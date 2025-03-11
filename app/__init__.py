@@ -17,9 +17,10 @@ def create_app(config=None):
 
     from app.controller.admin_controller import router as admin_router
     from app.controller.user_controller import router as user_router
+    from app.controller.recommended_items_controller import router as recommended_items_router
 
     app.register_blueprint(admin_router)
     app.register_blueprint(user_router)
+    app.register_blueprint(recommended_items_router)
 
     return app
-
