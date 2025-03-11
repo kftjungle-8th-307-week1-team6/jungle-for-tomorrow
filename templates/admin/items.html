@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "admin/layout.html" %}
 
 {% block title %}필수 준비물 설정{% endblock %}
 
@@ -28,10 +28,10 @@
                         <td class="px-6 py-4 text-sm text-gray-900">{{ item.type }}</td>
                         <td class="px-6 py-4 text-sm text-gray-900">{{ item.quantity }}</td>
                         <td class="px-6 py-4 text-right space-x-2">
-                            <button class="text-gray-400 hover:text-custom !rounded-button" onclick="editItem({{ item.id }})">
+                            <button class="text-gray-400 hover:text-custom !rounded-button" onclick="editItem('{{ item._id }}')">
                                 <i class="fas fa-pencil"></i>
                             </button>
-                            <button class="text-gray-400 hover:text-red-500 !rounded-button" onclick="confirmDelete({{ item.id }})">
+                            <button class="text-gray-400 hover:text-red-500 !rounded-button" onclick="confirmDelete('{{ item._id }}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -39,6 +39,26 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+        <!-- 페이지네이션 UI -->
+        <div class="pagination mt-4 flex justify-center">
+            {% if page > 1 %}
+            <a href="{{ url_for('admin.item_list', page=page-1, per_page=per_page) }}" class="px-3 py-1 bg-gray-200 rounded-md mr-2">이전</a>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+            <a href="{{ url_for('admin.item_list', page=p, per_page=per_page) }}"
+                class="px-3 py-1 {% if p == page %}bg-custom text-white{% else %}bg-gray-200{% endif %} rounded-md mr-2">
+                {{ p }}
+            </a>
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <a href="{{ url_for('admin.item_list', page=page + 1, per_page=per_page) }}"
+                class="px-3 py-1 bg-gray-200 rounded-md">
+                다음
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -66,7 +86,7 @@
                         <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom focus:border-custom" required>
                             <option value="">선택하세요</option>
                             {% for type in item_types %}
-                            <option value="{{ type.id }}">{{ type.name }}</option>
+                            <option value="{{ type._id }}">{{ type.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -105,7 +125,7 @@
                         <select id="editType" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom focus:border-custom" required>
                             <option value="">선택하세요</option>
                             {% for type in item_types %}
-                            <option value="{{ type.id }}">{{ type.name }}</option>
+                            <option value="{{ type._id }}">{{ type.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -142,6 +162,17 @@
         // 여기서 AJAX로 아이템 정보를 가져오거나, 이미 페이지에 있는 데이터를 활용할 수 있습니다
         // 예시로는 간단히 폼 액션 URL만 변경합니다
         document.getElementById('editForm').action = "{{ url_for('admin.edit_item', id=0) }}".replace('0', id);
+
+        const row = event.target.closest('tr');
+        const name = row.cells[0].textContent;
+        const type = row.cells[1].textContent;
+        const quantity = row.cells[2].textContent;
+
+        // 폼 필드에 데이터 채우기
+        document.getElementById('editName').value = name;
+        document.getElementById('editQuantity').value = quantity;
+
+
         document.getElementById('editModal').classList.remove('hidden');
     }
 
