@@ -15,4 +15,12 @@ def init_db(app):
 
     mongo = PyMongo(app, uri=mongo_uri)
     db = mongo.db
+
+    if db.item_types.count_documents({}) == 0:
+        db.item_types.insert_many([
+            {"name":"전자기기"},
+            {"name":"문구류"},
+            {"name":"기타"},
+            {"name":"의류"}
+        ])
     return db

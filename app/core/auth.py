@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import jsonify
+from flask import jsonify, redirect, url_for
 from flask_jwt_extended import get_jwt, verify_jwt_in_request
 
 
@@ -8,9 +8,9 @@ def role_required(allowed_roles):
         @wraps(fn)
         def decorator(*args, **kwargs):
             try:
-                verify_jwt_in_request()
+                verify_jwt_in_request(locations=['cookies'])
             except Exception as e:
-                return jsonify({"error": "유효하지 않은 토큰입ㅈ니다.", "details": str(e)}), 401
+                return redirect(url_for('user.login'))
             claims = get_jwt()
             role = claims.get("role", "")
 
