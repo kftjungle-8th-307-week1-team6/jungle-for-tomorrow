@@ -1,138 +1,371 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>추천 아이템</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet">    <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
-    <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>추천 아이템</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+  <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <nav class="bg-white shadow">
-        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">            <div class="flex justify-between h-16">
-                <div class="flex-shrink-0 flex items-center">
-                    <img class="h-8 w-auto" src="https://ai-public.creatie.ai/gen_page/logo_placeholder.png" alt="로고">                </div>
-                <div class="flex items-center">
-                    <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그인</button>
-                </div>
-            </div>
+  <nav class="bg-white shadow">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex-shrink-0 flex items-center">
+          <img class="h-8 w-auto" src="https://ai-public.creatie.ai/gen_page/logo_placeholder.png" alt="로고">
         </div>
-    </nav>
+        <div class="flex items-center">
+          <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그인</button>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-    <main class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">        <h1 class="text-2xl font-bold text-gray-900 mb-8">추천 아이템</h1>
-        
-        <div class="space-y-6">
-            <div class="flex flex-wrap gap-2">                <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium"># 전체</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 의료물품</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 문구</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 서적</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 전자기기</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 생필품</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 가방</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 의류</button>
-                <button class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># 기타</button>
+  <main class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-8">추천 아이템</h1>
+    
+    <div class="space-y-6">
+      <div class="flex flex-wrap gap-2">
+        <a href="{{ url_for('recommended_items.recommended_items_page') }}" class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium"># 전체</a>
+        {% for cat in categories %}
+          <a href="{{ url_for('recommended_items.recommended_items_page', category=cat) }}" class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># {{ cat }}</a>
+        {% endfor %}
+      </div>
+
+      <div class="flex gap-4 items-center">
+        <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium" id="createNewItem">
+          <i class="fas fa-plus mr-2"></i>새 아이템 추가
+        </button>
+        <div class="flex-1 flex gap-4">
+          <div class="w-48">
+            <select class="w-full border-gray-300 focus:border-custom focus:ring-custom text-sm">
+              <option  value="none" disabled>=== 선택 ===</option>
+              <option value="item_name" selected>준비물 이름</option>
+              <option value="description" >추천하는 이유</option>
+              <option value="author">작성자</option>
+            </select>
+          </div>
+          <div class="flex-1 relative">
+            <input type="text" placeholder="검색" class="w-full pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- MongoDB에서 가져온 아이템들을 순회하며 카드로 표시 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in items %}
+        <div id="{{ item._id }}" class="bg-white rounded-lg shadow p-6 space-y-4">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-medium rec-item-name">{{ item.item_name }}</h3>
+              <div class="flex">
+                <span class="text-sm text-gray-500 rec-item-quantity">{{ item.quantity }} </span>
+                <span class="text-sm text-gray-500 rec-item-unit">{{ item.unit }} </span>
+              </div>
             </div>
-
-            <div class="flex gap-4 items-center">
-                <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">                    <i class="fas fa-plus mr-2"></i>새 아이템 추가
+            <span class="text-sm text-custom bg-blue-50 px-2 py-1 rounded-full rec-item-category">{{ item.category }}</span>
+          </div>
+          <p class="text-sm text-gray-600 rec-item-description">{{ item.description }}</p>
+          <div class="flex justify-between items-center pt-4">
+            <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">
+              <i class="fas fa-plus mr-2"></i>담기
+            </button>
+            <div class="flex gap-2">
+                <button class="text-gray-400 hover:text-gray-600">                                
+                  <i class="fas fa-edit"></i>
                 </button>
-                
-                <div class="flex-1 flex gap-4">                    <div class="w-48">
-                        <select class="w-full border-gray-300 focus:border-custom focus:ring-custom text-sm">                            <option>작성자</option>
-                            <option>김철수</option>
-                            <option>이영희</option>
-                            <option>박민준</option>
-                        </select>
-                    </div>                    <div class="flex-1 relative">
-                        <input type="text" placeholder="검색" class="w-full pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    </div>                </div>
-            </div>
+                <button class="text-gray-400 hover:text-gray-600">                                
+                  <i class="fas fa-trash"></i>
+                </button>
+            </div> 
+          </div>
+        </div>
+        {% endfor %}
+      </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white rounded-lg shadow p-6 space-y-4">                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-gray-900">무선 키보드</h3>
-                            <span class="inline-block mt-1 text-sm text-gray-500">전자기기</span>
-                        </div>                    </div>
-                    <p class="text-sm text-gray-600">인체공학적 디자인의 무선 키보드입니다. 배터리 수명이 길고 타이핑감이 우수합니다.</p>                    <div class="flex justify-between items-center pt-4">
-                        <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">                            <i class="fas fa-plus mr-2"></i>담기
-                        </button>
-                        <div class="flex gap-2">                            <button class="text-gray-400 hover:text-gray-500">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-gray-400 hover:text-gray-500">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+      <div class="flex justify-center mt-8">
+        <nav class="flex items-center space-x-2">
+          <button class="!rounded-button px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button class="!rounded-button px-4 py-2 text-sm font-medium text-white bg-custom">1</button>
+          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">2</button>
+          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">3</button>
+          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">4</button>
+          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">5</button>
+          <button class="!rounded-button px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </main>
 
-                <div class="bg-white rounded-lg shadow p-6 space-y-4">                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-gray-900">노트북 파우치</h3>
-                            <span class="inline-block mt-1 text-sm text-gray-500">가방</span>
-                        </div>                    </div>
-                    <p class="text-sm text-gray-600">15인치 노트북까지 수납 가능한 고급 가죽 파우치입니다. 충격 보호 기능이 있습니다.</p>                    <div class="flex justify-between items-center pt-4">
-                        <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">                            <i class="fas fa-plus mr-2"></i>담기
-                        </button>
-                        <div class="flex gap-2">                            <button class="text-gray-400 hover:text-gray-500">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-gray-400 hover:text-gray-500">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+  <!-- 생성 모달 (초기에는 hidden) -->
+  <div id="createModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white p-6 rounded shadow-lg w-full max-w-lg">  
+      <h2 class="text-xl font-bold mb-4">새 아이템 추가</h2>
+      <form>
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="newItemTitle">아이템명</label>
+          <input type="text" id="newItemTitle" class="w-full border border-gray-300 p-2 rounded" placeholder="아이템명을 입력하세요">
+        </div>
 
-                <div class="bg-white rounded-lg shadow p-6 space-y-4">                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-gray-900">만년필 세트</h3>
-                            <span class="inline-block mt-1 text-sm text-gray-500">문구</span>
-                        </div>                    </div>
-                    <p class="text-sm text-gray-600">고급 만년필과 잉크 카트리지로 구성된 세트입니다. 선물용으로 적합합니다.</p>                    <div class="flex justify-between items-center pt-4">
-                        <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">                            <i class="fas fa-plus mr-2"></i>담기
-                        </button>
-                        <div class="flex gap-2">                            <button class="text-gray-400 hover:text-gray-500">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-gray-400 hover:text-gray-500">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>            <div class="flex justify-center mt-8">
-                <nav class="flex items-center space-x-2">
-                    <button class="!rounded-button px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="!rounded-button px-4 py-2 text-sm font-medium text-white bg-custom">1</button>
-                    <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">2</button>
-                    <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">3</button>
-                    <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">4</button>
-                    <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">5</button>
-                    <button class="!rounded-button px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </nav>
-            </div>        </div>
-    </main>
+        <div class="mb-4 flex">
+          <div class="mb-4 mr-4 w-full">
+            <label class="block text-gray-700 mb-2" for="newItemQuantity">수량</label>
+            <input type="text" id="newItemQuantity" class="w-full border border-gray-300 p-2 rounded" placeholder="수량을 입력하세요">
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2" for="newItemUnit">단위</label>
+            <input type="text" id="newItemUnit" class="w-full border border-gray-300 p-2 rounded" placeholder="예시: 개, kg, ml">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="newItemCategory">카테고리</label>
+          <select id="newItemCategory" class="w-full border border-gray-300 p-2 rounded">
+            {% for cat in categories %}
+              <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-    <script>
-        document.querySelectorAll('button').forEach(button => {
-            if (button.textContent.includes('담기')) {
-                button.addEventListener('click', () => {
-                    if (confirm('진짜로 이 아이템을 당신의 목록에 추가하시겠습니까?')) {
-                        alert('아이템이 추가되었습니다.');
-                    }
-                });
-            }
-            if (button.querySelector('.fa-trash')) {
-                button.addEventListener('click', () => {
-                    if (confirm('이 아이템을 삭제하시겠습니까?')) {
-                        button.closest('.bg-white').remove();
-                    }
-                });
-            }
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="newItemDescription">설명</label>
+          <textarea id="newItemDescription" class="w-full border border-gray-300 p-2 rounded" rows="3" placeholder="설명을 입력하세요"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelCreate" class="!rounded-button bg-gray-300 text-white px-4 py-2 text-sm font-medium">취소</button>
+          <button type="submit" id="submitCreate" class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">저장</button> 
+        </div>
+      </form>
+    </div>
+  </div>  
+
+  <!-- 수정 모달 (초기에는 hidden) -->
+  <div id="editModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white p-6 rounded shadow-lg w-full max-w-lg">  
+      <h2 class="text-xl font-bold mb-4">아이템 수정</h2>
+      <form id="editForm">
+        <!-- 수정할 아이템의 `_id`값 -->
+        <input type="hidden" id="editItemId" value="">
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="editItemTitle">아이템명</label>
+          <input type="text" id="editItemTitle" class="w-full border border-gray-300 p-2 rounded" placeholder="아이템명을 입력하세요">
+        </div>
+
+        <div class="mb-4 flex">
+          <div class="mb-4 mr-4 w-full">
+            <label class="block text-gray-700 mb-2" for="editItemQuantity">수량</label>
+            <input type="text" id="editItemQuantity" class="w-full border border-gray-300 p-2 rounded" placeholder="수량을 입력하세요">
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2" for="editItemUnit">단위</label>
+            <input type="text" id="editItemUnit" class="w-full border border-gray-300 p-2 rounded" placeholder="예시: 개, kg, ml">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="editItemCategory">카테고리</label>
+          <select id="editItemCategory" class="w-full border border-gray-300 p-2 rounded">
+            {% for cat in categories %}
+              <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="editItemDescription">설명</label>
+          <textarea id="editItemDescription" class="w-full border border-gray-300 p-2 rounded" rows="3" placeholder="설명을 입력하세요"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelEdit" class="!rounded-button bg-gray-300 text-white px-4 py-2 text-sm font-medium">취소</button>
+          <button type="submit" class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  
+    function deleteItemFromDb(card) {
+      if (confirm('이 아이템을 삭제하시겠습니까?')) {
+        const itemId = card.id;
+        fetch(`/recommended-items/item/${itemId}`, {
+          method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(result => {
+          alert('아이템이 삭제되었습니다.');
+          card.remove();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('삭제 중 오류가 발생했습니다.');
         });
-    </script></body>
+      }
+    }
+
+    function openCreateNewItemModal() {
+      document.getElementById('createModal').classList.remove('hidden');
+    }
+
+    function closeCreateNewItemModal() {
+      document.getElementById('createModal').classList.add('hidden');
+    }
+
+    function openModal(card) {
+      const modal = document.getElementById('editModal');
+      const title = card.querySelector('h3').textContent;
+      const quantity = card.querySelector('.rec-item-quantity').textContent.trim();
+      const unit = card.querySelector('.rec-item-unit').textContent.trim();
+      const description = card.querySelector('.rec-item-description').textContent;
+      const category = card.querySelector('.rec-item-category').textContent.trim();
+      const itemId = card.id;
+      
+      document.getElementById('editItemId').value = itemId;
+      document.getElementById('editItemTitle').value = title;
+      document.getElementById('editItemQuantity').value = quantity;
+      document.getElementById('editItemUnit').value = unit;
+      document.getElementById('editItemDescription').value = description;
+      document.getElementById('editItemCategory').value = category;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('editModal');
+      modal.classList.add('hidden');
+    }
+
+    // 새 아이템 추가 모달 열기
+    document.querySelector('#createNewItem').addEventListener('click', () => {
+      openCreateNewItemModal();
+    });
+    
+    // 새 아이템 추가 모달 닫기
+    document.querySelector('#cancelCreate').addEventListener('click', () => {
+      closeCreateNewItemModal();
+    });
+
+    // 수정 아이콘 클릭 시 모달 열기
+    document.querySelectorAll('.fa-edit').forEach(icon => {
+      icon.addEventListener('click', () => {
+        // id attribute가 있는 가장 가까운 부모 요소 찾기
+        const card = icon.closest('[id]');
+        openModal(card);
+      });
+    });
+
+    // 삭제 아이콘 클릭 시 해당 아이템을 제거
+    document.querySelectorAll('.fa-trash').forEach(icon => {
+      icon.addEventListener('click', () => {
+        // id attribute가 있는 가장 가까운 부모 요소 찾기
+        const card = icon.closest('[id]');
+        deleteItemFromDb(card);
+      });
+    });
+
+    // 취소 버튼 클릭 시 모달 닫기
+    document.getElementById('cancelEdit').addEventListener('click', () => {
+      closeModal();
+    });
+
+    // 수정 폼 제출 시 (수정 저장)
+    document.getElementById('editForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const itemId = document.getElementById('editItemId').value;
+      const itemTitle = document.getElementById('editItemTitle').value;
+      const itemCategory = document.getElementById('editItemCategory').value;
+      const itemQuantity = document.getElementById('editItemQuantity').value;
+      const itemUnit = document.getElementById('editItemUnit').value;
+      const itemDescription = document.getElementById('editItemDescription').value;
+
+      // PUT 요청으로 보낼 JSON 데이터 구성
+      const data = {
+        item_name: itemTitle,
+        category: itemCategory,
+        quantity: itemQuantity,
+        unit: itemUnit,
+        description: itemDescription
+      };
+
+      // /item/<itemId> URL로 PUT 요청 (서버에서 해당 _id에 대해 업데이트 진행)
+      fetch(`/recommended-items/item/${itemId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        alert('수정 내용이 저장되었습니다.');
+        closeModal();
+        // UI상에서 카드 업데이트 등 추가 작업 진행
+        window.location.reload();
+
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('수정 중 오류가 발생했습니다.');
+      });
+    });
+
+    // 생성 폼 제출 시 (생성 저장)
+    document.querySelector('#submitCreate').addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const itemTitle = document.getElementById('newItemTitle').value;
+      const itemCategory = document.getElementById('newItemCategory').value;
+      const itemQuantity = document.getElementById('newItemQuantity').value;
+      const itemUnit = document.getElementById('newItemUnit').value;
+      const itemDescription = document.getElementById('newItemDescription').value;
+
+      // POST 요청으로 보낼 JSON 데이터 구성
+      const data = {
+        item_name: itemTitle,
+        category: itemCategory,
+        quantity: itemQuantity,
+        unit: itemUnit,
+        description: itemDescription
+      };
+
+      // /item URL로 POST 요청 (서버에서 새로운 아이템 생성)
+      fetch('/recommended-items/item', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        alert('새 아이템이 추가되었습니다.');
+        closeCreateNewItemModal();
+        // UI상에서 카드 추가 등 추가 작업 진행
+        window.location.reload();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('생성 중 오류가 발생했습니다.');
+      });
+    });
+
+    // 기존의 "담기" 및 삭제 기능 이벤트 핸들러
+    document.querySelectorAll('button').forEach(button => {
+      if (button.textContent.includes('담기')) {
+        button.addEventListener('click', () => {
+          if (confirm('이 아이템을 당신의 목록에 추가하시겠습니까?')) {
+            alert('아이템이 추가되었습니다.');
+          }
+        });
+      }
+    });
+  </script>
+</body>
 </html>
