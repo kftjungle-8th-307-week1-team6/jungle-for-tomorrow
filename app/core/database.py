@@ -9,9 +9,6 @@ db = None
 def init_db(app):
     global mongo, db
     global mongo, db
-    
-    # mongo = MongoClient('localhost', 27017, username="admin", password="adminpassword")
-    mongo = PyMongo(app)
+    mongo = PyMongo(app, uri="mongodb://localhost:27017/jungle_tommorow")
     db = mongo.db
     return db
-

@@ -6,11 +6,8 @@ from app.core.extension import init_extensions, bcrypt, jwt
 
 def create_app(config=None):
     template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'..','templates'))
-    app = Flask(__name__, template_folder=template_dir)    
-    
-    app.config['MONGO_URI']='mongodb://admin:adminpassword@localhost:27017/dbyurucamp1?authSource=admin'
+    app = Flask(__name__, template_folder=template_dir)
     app.config['JWT_SECRET_KEY'] = 'test'
-
     init_db(app)
     init_extensions(app)
 
@@ -23,4 +20,3 @@ def create_app(config=None):
     app.register_blueprint(recommended_items_router)
 
     return app
-
