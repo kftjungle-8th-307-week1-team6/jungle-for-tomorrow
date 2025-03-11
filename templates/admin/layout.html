@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{% block title %}필수 준비물 설정{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+    <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 font-[Noto Sans KR]">
+    <div class="max-w-8xl mx-auto px-4">
+        <div class="bg-white rounded-lg shadow-sm mb-6">
+            <div class="flex items-center justify-between p-4 border-b">
+                <div class="flex items-center">
+                    <img src="{{ url_for('static', filename='images/logo_placeholder.png') }}" alt="로고" class="h-8"/>
+                </div>
+                {% block header_content %}{% endblock %}
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+
+        {% block modals %}{% endblock %}
+    </div>
+</body>
+</html>

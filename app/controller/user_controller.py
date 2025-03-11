@@ -1,52 +1,47 @@
-import sys
-
-from flask import Flask, render_template, jsonify, request
-from flask_jwt_extended import (JWTManager,
-                                create_access_token,
-                                jwt_required,
-                                get_jwt_identity,
-                                create_refresh_token,
-                                )
-from bson import ObjectId
-from flask_bcrypt import Bcrypt
-from pymongo import MongoClient
+from flask import Blueprint, jsonify, request
+from app.core.extension import bcrypt
+from app.core.database import db
+from flask_jwt_extended import (create_access_token, get_jwt_identity,)
 from datetime import timedelta
-from core.auth import admin_required, user_required
+from app.core.auth import user_required
 
 import uuid
-from functools import wraps
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client.jungle_tommorow
-
-app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'test'
-
-jwt = JWTManager(app)
-bcrypt = Bcrypt(app)
+router = Blueprint("user", __name__, url_prefix="/user")
 
 
-@app.route('/login', methods=['POST'])
+@router.route('/login', methods=['POST'])
 def login():
     username = request.json.get('username', None)
     password = request.json.get('password', None)
+
+    if not username or not password:
+        return jsonify({"msg": "사용자명과 비밀번호를 모두 입력해주세요"}), 400
 
     user = db.users.find_one({"username": username})
 
     if not user or not bcrypt.check_password_hash(user["password"], password):
         return jsonify({"msg": "잘못된 사용자명 또는 비밀번호입니다."}), 401
 
-    additional_claims = {"role": user.get("role", "username")}
+    user_role = user.get("role", "user")
+
+    if user_role not in ["admin", "user"]:
+        user_role = "user"
+
+    additional_claims = {"role": user_role}
     access_token = create_access_token(
         identity=username,
         additional_claims=additional_claims,
         expires_delta=timedelta(hours=1)
     )
 
-    return jsonify(access_token=access_token), 200
+    return jsonify({
+        "access_token": access_token,
+        "role": user_role
+    }), 200
 
 
-@app.route('/signup', methods=['POST'])
+@router.route('/signup', methods=['POST'])
 def sign_up():
     data = request.get_json()
     username = data.get('username')
@@ -72,8 +67,7 @@ def sign_up():
     return jsonify({"message" : "회원가입이 완료되었습니다."}), 201
 
 
-# 아래 API는 간단한 테스트 용 API 입니다.
-@app.route('/user/info', methods=['GET'])
+@router.route('/info', methods=['GET'])
 @user_required() # 데코레이터를 이용해 API의 권한을 설정합니다. user_required() 는 유저 및 Admin이 확인 가능하며, admin_required()는 admin만 확인 가능합니다.
 def get_user_info():
 
@@ -90,8 +84,3 @@ def get_user_info():
     }
 
     return jsonify(user_info), 200
-
-
-if __name__ == '__main__':
-    print(sys.executable)
-    app.run('0.0.0.0', port=5001, debug=True)
