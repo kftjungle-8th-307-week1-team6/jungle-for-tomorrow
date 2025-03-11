@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__)
-app.secret_key = 'a089wah09fga2f0ag2n34'  # flash()의 플래시 메시지를 사용하기 위한 시크릿 키
+
+# flash()의 플래시 메시지를 사용하기 위한 시크릿 키
+# TODO: 실제 배포 시에는 반드시 키를 교체 및 은닉할 것.
+app.secret_key = 'a089wah09fga2f0ag2n34' 
 
 # 데모용 사용자 데이터 (실제 운영에서는 MongoDB 사용 필요)
 users = {
