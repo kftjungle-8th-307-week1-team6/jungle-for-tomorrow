@@ -508,14 +508,13 @@
     // 검색 상자 클릭 시 좌측으로 뻗어나감.
     const searchField = document.getElementById('search_field');
 
+    // not-focused 클래스 제거 및 focused 클래스 추가, 그리고 vise versa
     searchField.addEventListener('focus', () => {
-      // not-focused 클래스 제거 및 focused 클래스 추가
       searchField.classList.remove('not_focused');  
       searchField.classList.add('focused');
     });
 
     searchField.addEventListener('blur', () => {
-      // focused 클래스 제거 및 not-focuced 클래스 추가
       searchField.classList.remove('focused');
       searchField.classList.add('not_focused');
     });
