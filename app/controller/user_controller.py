@@ -6,8 +6,8 @@ from datetime import timedelta
 from app.core.auth import user_required
 import uuid
 from pymongo import MongoClient
-client = MongoClient('localhost', 27017)
-db = client.dbyurucamp1
+# client = MongoClient('localhost', 27017)
+# db = client.dbyurucamp1
 
 router = Blueprint("user", __name__, url_prefix="/user")
 
@@ -61,8 +61,8 @@ def sign_up():
     hashed_password = bcrypt.generate_password_hash(pw).decode('utf-8')
 
     user_data = {
-        "user_id": id,
-        "user_pw": hashed_password,
+        "username": id,
+        "password": hashed_password,
         "name": name,
         "nickname": nickname,
         "division": division,

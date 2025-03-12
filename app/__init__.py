@@ -2,7 +2,12 @@ import os
 from flask import Flask
 from app.core.database import init_db
 from app.core.extension import init_extensions, bcrypt, jwt
+from jinja2 import Environment
 
+def update_query_params(original, updates):
+    params = original.copy()
+    params.update(updates)
+    return params
 
 def create_app(config=None):
     template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'..','templates'))
@@ -13,6 +18,10 @@ def create_app(config=None):
     app.config['JWT_TOKEN_LOCATION'] = ['cookies']
     app.config['JWT_COOKIE_SECURE'] = False
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+
+    # pagination (김민석)
+    app.jinja_env.filters['update'] = update_query_params
+
     init_db(app)
     init_extensions(app)
 
