@@ -85,7 +85,8 @@ def items(user_id=None):
         page=page,
         per_page=per_page,
         total_pages=total_pages,
-        checked_items=checked_items
+        checked_items=checked_items,
+        user_details = user
     )
 
 

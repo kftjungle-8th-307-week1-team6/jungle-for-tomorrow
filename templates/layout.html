@@ -1,39 +1,68 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}필수 준비물 설정{% endblock %}</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-    <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
-    <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
-    {% block extra_head %}{% endblock %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet" />
+    <script
+        src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+    <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000"
+        data-border-radius="small"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
     <style>
-        .header .logoBox {
-            padding-left: 2rem;
-            font-size: 2rem;
+        #logoText {
+            font-family: "Black Han Sans", sans-serif;
+            font-weight: 400;
+            font-style: normal;
         }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
+
 <body class="bg-gray-50 font-[Noto Sans KR]">
-    <div class="max-w-8xl mx-auto px-4">
-        <div class="bg-white rounded-lg shadow-sm mb-6">
-            <div class="flex items-center justify-between p-4 border-b">
-                <div class="flex items-center">
+    <nav class="bg-white shadow">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex-shrink-0 flex items-center">
                     <a href="{{ url_for('main.home') }}" class="flex items-center">
-                      <img class="h-8 w-auto" src="/static/logo.jpg" alt="로고"/>
-                      <span class="logoBox font-bold ml-2 text-3xl">내일은 정글</span>
+                        <img class="h-8 w-auto" src="/static/backpack.png" alt="로고" />
+                        <span class="font-extrabold ml-2 text-3xl" id="logoText">내일은 정글</span>
                     </a>
                 </div>
-                {% block header_content %}{% endblock %}
+                <div class="flex items-center">
+                    {% if user_details %}
+                    <span class="text-sm font-bold">{{ user_details.get('division') }} {{ user_details.get('generation')
+                        }}기 {{ user_details.get('name') }}</span>
+                    <span class="text-sm font-medium mr-5"> 님, 환영합니다!</span>
+                    <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium"
+                        onclick="logoutUser()">
+                        로그아웃
+                    </button>
+                    {% else %}
+                    <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그인</button>
+                    {% endif %}
+                </div>
             </div>
         </div>
+    </nav>
 
+    <div class="max-w-8xl mx-auto px-4">
         {% block content %}{% endblock %}
-
         {% block modals %}{% endblock %}
     </div>
+
+    <script>
+        function logoutUser() {
+            window.location.href = "{{ url_for('user.logout') }}";
+        }
+    </script>
 </body>
+
 </html>

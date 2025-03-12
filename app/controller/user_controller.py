@@ -84,7 +84,7 @@ def sign_up():
 
 @router.route('/logout', methods=['GET'])
 def logout():
-    response = redirect(url_for('main.home'))
+    response = redirect(url_for('main.loginPage'))
     response.delete_cookie('access_token_cookie')
     flash("로그아웃 되었습니다.", "success")
     return response

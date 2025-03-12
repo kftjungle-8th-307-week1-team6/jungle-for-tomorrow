@@ -146,7 +146,7 @@
 
 <body>
   <div class="logoBox" style="font-weight: bold;">
-    <img src="{{ url_for('static', filename='logo.jpg')}}" alt="" width="60" height="57"> 내일은 정글
+    <img src="{{ url_for('static', filename='backpack.png')}}" alt="" width="60" height="57"> 내일은 정글
   </div>
   <div class="container">
     <form action="{{ url_for('user.sign_up') }}" id="joinForm" method="POST">
@@ -270,10 +270,11 @@
       } else if ($("#nicknameBox").css("color") == "rgb(255, 0, 0)") {
         alert("닉네임 중복체크를 진행해주세요!");
         e.preventDefault();
-      }
-      let isRightDepartment = confirm($("#division").val() + " " + $("#generation").val() + "기 " + $("#name").val() + " 님으로 가입하시겠습니까?");
-      if (!isRightDepartment) {
-        e.preventDefault();
+      } else {
+        let isRightDepartment = confirm($("#division").val() + " " + $("#generation").val() + "기 " + $("#name").val() + " 님으로 가입하시겠습니까?");
+        if (!isRightDepartment) {
+          e.preventDefault();
+        }
       }
     });
 
