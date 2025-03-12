@@ -51,14 +51,16 @@ def items(user_id=None):
                 {"is_recommended": False}
             ]
         }
+    # 아이템 타입 가져오기
+    item_types = list(db.item_types.find())
 
-    # 종류별 필터링
-    if item_type == 'electronics':
-        query["type"] = '전자기기'
-    elif item_type == 'stationery':
-        query["type"] = '학습&문구'
-    elif item_type == 'other':
-        query["type"] = '기타'
+    # 종류별 필터링 - 동적으로 적용
+    if item_type != 'all':
+        # 선택된 타입 ID에 해당하는 타입 이름 찾기
+        for type_doc in item_types:
+            if str(type_doc['_id']) == item_type or type_doc['name'] == item_type:
+                query["type"] = type_doc['name']
+                break
 
     # MongoDB에서 데이터 가져오기 (페이지네이션 적용)
     total_items = db.items.count_documents(query)
@@ -66,9 +68,6 @@ def items(user_id=None):
 
     # 전체 페이지 수 계산
     total_pages = (total_items + per_page - 1) // per_page
-
-    # 아이템 타입 가져오기
-    item_types = list(db.item_types.find())
 
     return render_template(
         'my_item/my_item.html',
