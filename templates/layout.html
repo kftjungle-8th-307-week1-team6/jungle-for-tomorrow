@@ -5,22 +5,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}필수 준비물 설정{% endblock %}</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&amp;display=swap"
-        rel="stylesheet" />
-    <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet" />
-    <script
-        src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
-    <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000"
-        data-border-radius="small"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+    <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
+
+    <!-- Pretendard 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+
+    <!-- 이 부분은 절대 지우지 마세요. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
-    <style>
-        #logoText {
-            font-family: "Black Han Sans", sans-serif;
+
+    {% block extra_head %}{% endblock %}
+    <style>        
+        *{
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", "Apple SD Gothic Neo", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+        }
+                
+        body div span.titlelogo {
+            box-sizing: border-box;
+            font-family: "Black Han Sans", sans-serif !important;
             font-weight: 400;
             font-style: normal;
+        }
+
+        .header .logoBox {
+            padding-left: 2rem;
+            font-size: 2rem;
         }
     </style>
     {% block extra_head %}{% endblock %}
@@ -32,23 +47,24 @@
             <div class="flex justify-between h-16">
                 <div class="flex-shrink-0 flex items-center">
                     <a href="{{ url_for('main.home') }}" class="flex items-center">
-                        <img class="h-8 w-auto" src="/static/backpack.png" alt="로고" />
-                        <span class="font-extrabold ml-2 text-3xl" id="logoText">내일은 정글</span>
+                      <img class="h-8 w-auto" src="/static/logo.jpg" alt="로고"/>
+                      <span class="logoBox titlelogo font-bold ml-2 text-3xl">내일은 정글</span>
                     </a>
                 </div>
+                
                 <div class="flex items-center">
-                    {% if user_details %}
-                    <span class="text-sm font-bold">{{ user_details.get('division') }} {{ user_details.get('generation')
-                        }}기 {{ user_details.get('name') }}</span>
+                    {% if user_name and user_division and user_generation %}
+                    <span class="text-sm font-bold ">{{ user_division  }} {{ user_generation  }}기 {{ user_name }}</span>
                     <span class="text-sm font-medium mr-5"> 님, 환영합니다!</span>
-                    <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium"
-                        onclick="logoutUser()">
+                    
+                    <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium" onclick="location.href='{{ url_for('user.logout') }}'">
                         로그아웃
                     </button>
                     {% else %}
                     <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그인</button>
                     {% endif %}
                 </div>
+                {% block header_content %}{% endblock %}
             </div>
         </div>
     </nav>

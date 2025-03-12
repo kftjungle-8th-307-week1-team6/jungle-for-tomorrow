@@ -192,95 +192,10 @@ def recommended_items_page():
     )
 
 
-# @router.route('/list', methods=['GET'])
-# def recommended_items_page():
-#     parameter_dict = request.args.to_dict()
-#     items_collection = db.items
-#     current_user = None
-#     user_details = None
-#     search_query = {} # 필요할 때만 사용, 필터링 조건을 담음 => 없으면 전체 조회
-
-#     # JWT
-#     try:
-#         verify_jwt_in_request(optional=True)
-#         current_user = get_jwt_identity()
-#         print(current_user)
-#         user_details = db.users.find_one({"username": current_user})
-#     except Exception:
-#         pass
-
-#     # 1. 카테고리 필터
-#     category = parameter_dict.get('category')
-#     if category:
-#         search_query['category'] = category
-    
-#     # 2. 검색 조건
-#     search_keyword = parameter_dict.get('search', '').strip()
-#     search_field = parameter_dict.get('search_field', '')
-#     if search_keyword and search_field in ['item_name', 'description', 'author']:
-#         search_query[search_field] = {"$regex": search_keyword, "$options": "i"}
-
-#     # 페이지네이션 파라미터
-#     page = int(parameter_dict.get('page', 1))
-#     per_page = int(parameter_dict.get('per_page', 10))
-#     skip = (page - 1) * per_page
-
-#     # 전체 문서 수 및 페이지 계산
-#     total_items = items_collection.count_documents(search_query)
-#     total_pages = (total_items + per_page - 1) // per_page  # 올림 계산
-
-#     # 아이템 조회 && 페이지네이션
-#     items_cursor = items_collection.find(search_query).sort("shipped_count", -1).skip(skip).limit(per_page)
-#     items = list(items_cursor)
-
-#     # ObjectId 변환 
-#     for item in items:
-#         item['_id'] = str(item['_id'])
-
-#     # 페이지 범위 계산 ==> Jinja2 템플릿 페이지에서 사용할 것.
-#     start_page = max(1, page - 2)
-#     end_page = min(total_pages, page + 2)
-    
-#     # 페이지 범위 조정 로직
-#     if end_page - start_page < 4:
-#         if page < 3:
-#             end_page = min(5, total_pages)
-#         else:
-#             start_page = max(1, end_page - 4)
-#     pages_range = range(start_page, end_page + 1)
-
-#     categories = ["의료품", "문구/학용품", "서적", "전자기기", "생필품", "가방", "의류", "호신용품", "식품", "기타"]
-
-#     return render_template(
-#         "recommended_items/items.j2",
-#         items=items,
-#         parameter_dict=parameter_dict,
-#         categories=categories,
-#         current_user=current_user,
-#         user_details=user_details,
-#         pagination={
-#             'page': page,
-#             'per_page': per_page,
-#             'total_items': total_items,
-#             'total_pages': total_pages,
-#             'start_page': start_page,
-#             'end_page': end_page,
-#             'pages_range': pages_range,
-#             'has_prev': page > 1,
-#             'prev_num': page - 1,
-#             'has_next': page < total_pages,
-#             'next_num': page + 1
-#         }
-#     )
-
-# @router.route('/setting', methods=['GET'])
-# def admin_require_item_setting_page():
-#     return render_template("admin/layout.html")
-
 @router.route('/item/<string:item_id>/save', methods=['POST'])
 def save_item(item_id):    
     current_user = None
-    user_id_string = ""
+    user_id_string = None
 
     # JWT => User의 ObjectId를 가져옴
     try:
@@ -289,7 +204,7 @@ def save_item(item_id):
         user_details = db.users.find_one({"username": current_user})
         user_id_string = str(user_details['_id'])
     except Exception:
-        pass
+        return jsonify({"result": "failure", "reason": "올바른 유저가 아닙니다."}), 403
 
     # User의 ObjectId를 담은 string을 ObjectId로 변환
     #   => User의 saved_items 필드에 아이템을 추가
@@ -298,18 +213,22 @@ def save_item(item_id):
 
         item_oid = ObjectId(item_id)
         user_oid = ObjectId(user_id)
-
+        
         item = db.items.find_one({"_id": item_oid})
         if not item:
-            return jsonify({"result": "failure"})
-        db.users.update_one(
+            return jsonify({"result": "failure", "reason": "올바른 아이템이 아닙니다."}), 400
+
+        result = db.users.update_one(
             {"_id": user_oid},
             {"$addToSet": {"saved_items": item_oid}}
         )
 
+        if result.modified_count == 0:
+            return jsonify({"result": "failure", "reason": "이미 담은 아이템입니다."}), 400
+
         # 해당 id의 아이템의 'shipped_count'를 1 증가시킴
         db.items.update_one({"_id": item_oid}, {"$inc": {"shipped_count": 1}}) 
-        return jsonify({"result": "success", "item_id": item_id, "shipped_count": item['shipped_count']+1 })
+        return jsonify({"result": "success", "item_id": item_id, "shipped_count": item['shipped_count']+1 }), 200
     
     except Exception as e:
-        return jsonify({"result": "failure"})
+        return jsonify({"result": "failure", "reason": "일반 오류."}), 500
