@@ -140,7 +140,7 @@
       .inputBox .col-2 button {
         width: auto;
       }
-      
+
     }
   </style>
   <title>내일은 정글 회원가입</title>
@@ -168,7 +168,7 @@
       <div class="row inputBox">
         <div class="col-2 d-flex justify-content-start align-items-center" id="idBox">아이디</div>
         <div class="col-8 d-flex justify-content-start align-items-center">
-          <input type="text" id="id" name="id" placeholder="영문 소문자,숫자,_로 구성된 6~20자" maxlength="20">
+          <input type="text" id="id" name="id" placeholder="사용할 이메일 주소 입력" maxlength="50">
         </div>
         <div class="col-2 d-flex justify-content-start align-items-center">
           <button type="button" class="btn btn-outline-primary" id="idCheck">중복체크</button>
@@ -234,17 +234,6 @@
 
     });
 
-    $("#id").on("keyup", function () {
-      let regex = /^[a-z0-9_]{6,20}$/;
-      let isCor = regex.test($("#id").val());
-
-      if (isCor) {
-        $("#idBox").css("color", "blue");
-      } else {
-        $("#idBox").css("color", "red");
-      }
-    });
-
     $("#pw").on("keyup", function () {
       let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
       let isCor = reg.test($("#pw").val());
@@ -295,32 +284,24 @@
         alert("아이디를 입력해주세요!");
         return;
       } else {
-        let regex = /^[a-z0-9_]{6,20}$/;
-        let isCor = regex.test($("#id").val());
-
-        if (!isCor) {
-          alert("아이디 형식이 올바르지 않습니다!");
-          return;
-        } else {
-          $.ajax({
-            type: "POST",
-            url: "/user/idCheck",
-            data: {
-              id: $("#id").val()
-            }
-          }).done(function (resp) {
-            if (resp.result === true) {
-              let isIdUse = confirm("사용 가능한 아이디입니다. 사용하시겠습니까?");
-              if (isIdUse) {
-                $("#idBox").css("color", "green");
-              } else {
-                $("#idBox").css("color", "blue");
-              }
+        $.ajax({
+          type: "POST",
+          url: "/user/idCheck",
+          data: {
+            id: $("#id").val()
+          }
+        }).done(function (resp) {
+          if (resp.result === true) {
+            let isIdUse = confirm("사용 가능한 아이디입니다. 사용하시겠습니까?");
+            if (isIdUse) {
+              $("#idBox").css("color", "green");
             } else {
-              alert("이미 사용중인 ID입니다. 다른 ID를 사용해주세요!");
+              $("#idBox").css("color", "blue");
             }
-          });
-        }
+          } else {
+            alert("이미 사용중인 ID입니다. 다른 ID를 사용해주세요!");
+          }
+        })
       }
     });
 
