@@ -157,28 +157,28 @@
     </div>
 
 
-    <form method="post" style="text-align: center;">
-      <img class="mb-4" src="{{ url_for('static', filename='logo.jpg')}}" alt="" width="60" height="57">
-      <h1 class="h3 mb-3 fw-normal">내일은 정글 로그인</h1>
+    <form method="POST" style="text-align: center;" action="/user/login" enctype="application/x-www-form-urlencoded">
+  <img class="mb-4" src="{{ url_for('static', filename='logo.jpg')}}" alt="" width="60" height="57">
+  <h1 class="h3 mb-3 fw-normal">내일은 정글 로그인</h1>
 
-      <div class="form-floating">
-        <input type="email" class="form-control" id="username" name="username" required>
-        <label for="floatingInput">아이디</label>
-      </div>
-      <div class="form-floating">
-        <input type="password" class="form-control" id="password" name="password" required>
-        <label for="floatingPassword">패스워드</label>
-      </div>
-      <button class="btn btn-primary w-100 py-2" type="button">로그인</button>
-      <p class="mt-5 mb-3 text-body-secondary">정글에 처음이신가요? <button type="button" class="btn btn-link" onclick="goRegisterPage()">지금 가입하세요!</button></p>
-      <div class="mb-4 mt-5 ">
-        <!-- Solid divider -->
-        <hr class="solid">
-      </div>
-      <p class="mt-5 mb-3 text-body-secondary">이용약관 개인정보처리방침 고객센터</p>
-      <p class="text-body-secondary">&copy; 2025 Jungle for Tomorrow </p>
-    </form>
-  </main>
+  <div class="form-floating">
+    <input type="email" class="form-control" id="floatingInput" name="username" required>
+    <label for="floatingInput">아이디</label>
+  </div>
+  <div class="form-floating">
+    <input type="password" class="form-control" id="floatingPassword" name="password" required>
+    <label for="floatingPassword">패스워드</label>
+  </div>
+  <button class="btn btn-primary w-100 py-2" type="submit">로그인</button>
+  <p class="mt-5 mb-3 text-body-secondary">정글에 처음이신가요? <a href="/register" class="btn btn-link">지금 가입하세요!</a></p>
+  <div class="mb-4 mt-5 ">
+    <!-- Solid divider -->
+    <hr class="solid">
+  </div>
+  <p class="mt-5 mb-3 text-body-secondary">이용약관 개인정보처리방침 고객센터</p>
+  <p class="text-body-secondary">&copy; 2025 Jungle for Tomorrow </p>
+</form>
+
   <!-- <script src="../assets/dist/js/bootstrap.bundle.min.js"></script> -->
 
 
