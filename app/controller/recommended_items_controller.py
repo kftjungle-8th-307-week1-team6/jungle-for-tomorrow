@@ -125,6 +125,9 @@ def recommended_items_page():
 
     # 삭제된 아이템 제외
     search_query["is_deleted"] = {"$ne": True}
+    # is_recommended 필드가 True인 아이템만 조회
+    search_query["is_recommended"] = True  # search_query에 is_recommended 조건 추가
+
     # 페이지네이션 처리
     page = int(parameter_dict.get('page', 1))
     per_page = int(parameter_dict.get('per_page', 10))
@@ -140,7 +143,6 @@ def recommended_items_page():
 
     # 아이템 조회 (내림차순 정렬 + 페이지네이션)
     # 수정된 코드
-    search_query["is_recommended"] = True  # search_query에 is_recommended 조건 추가
     items_cursor = items_collection.find(search_query).sort("shipped_count", -1).skip(skip).limit(limit_value)
 
     items = list(items_cursor)
