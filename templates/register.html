@@ -57,7 +57,8 @@
     #nameBox,
     #idBox,
     #pwBox,
-    #pwCheckBox {
+    #pwCheckBox,
+    #nicknameBox {
       color: red;
       font-weight: bold;
     }
@@ -98,7 +99,7 @@
     <img src="{{ url_for('static', filename='logo.jpg')}}" alt="" width="60" height="57"> 내일은 정글
   </div>
   <div class="container">
-    <form action="/addMember.members" id="joinForm" method="post">
+    <form action="/user/signup" id="joinForm" method="post">
       <div class="row mb-5 ms-1" id="registerBox">
         <div class="col-12 col-lg-6">
           <a href="#" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="
@@ -140,6 +141,20 @@
         </div>
         <div class="col-2 d-flex justify-content-start align-items-center">
           <button type="button" class="btn btn-outline-primary" id="nicknameCheck">중복체크</button>
+        </div>
+      </div>
+      <div class="row inputBox">
+        <div class="col-2 d-flex justify-content-start align-items-center" id="divisionBox">소속</div>
+        <div class="col-3 d-flex justify-content-start align-items-center">
+          <select class="form-select" aria-label="division_select" name="division" id="division">
+            <option selected value="정글">정글</option>
+            <option value="정글 게임랩">정글 게임랩</option>
+            <option value="정글 게임테크랩">정글 게임테크랩</option>
+          </select>
+        </div>
+        <div class="col-2 d-flex justify-content-start align-items-center">
+          <input type="number" class="form-control" min="1" max="100" step="1" value="8" name="generation"
+            id="generation">&nbsp;기
         </div>
       </div>
       <div class="row" id="btnrow">
@@ -213,8 +228,12 @@
       } else if ($("#pwCheckBox").css("color") == "rgb(255, 0, 0)") {
         alert("비밀번호를 올바르게 다시 입력해주세요");
         e.preventDefault();
-      }else if ($("#nicknameBox").css("color") == "black") {
+      } else if ($("#nicknameBox").css("color") == "rgb(255, 0, 0)") {
         alert("닉네임 중복체크를 진행해주세요!");
+        e.preventDefault();
+      }
+      let isRightDepartment = confirm($("#division").val() + " " + $("#generation").val() + "기 " + $("#name").val() + " 님으로 가입하시겠습니까?");
+      if (!isRightDepartment) {
         e.preventDefault();
       }
     });
@@ -224,31 +243,31 @@
         alert("아이디를 입력해주세요!");
         return;
       } else {
-        let regex = /^[a-z0-9_]{8,}$/;
+        let regex = /^[a-z0-9_]{6,20}$/;
         let isCor = regex.test($("#id").val());
 
         if (!isCor) {
           alert("아이디 형식이 올바르지 않습니다!");
           return;
         } else {
-          // $.ajax({
-          //   url: "/idCheck.members",
-          //   data: {
-          //     id: $("#id").val()
-          //   }
-          // }).done(function (resp) {
-          //   if (resp == "false") {
-          //     let isIdUse = confirm("사용 가능한 아이디입니다. 사용하시겠습니까?");
-          //     if (isIdUse) {
-          //       $("#idBox").css("color", "green");
-          //     } else {
-          //       $("#idBox").css("color", "blue");
-          //     }
-          //   } else {
-          //     alert("이미 사용중인 ID입니다. 다른 ID를 사용해주세요!");
-          //   }
-          // });
-          alert("중복체크 미구현");
+          $.ajax({
+            type: "POST",
+            url: "/user/idCheck",
+            data: {
+              id: $("#id").val()
+            }
+          }).done(function (resp) {
+            if (resp.result === true) {
+              let isIdUse = confirm("사용 가능한 아이디입니다. 사용하시겠습니까?");
+              if (isIdUse) {
+                $("#idBox").css("color", "green");
+              } else {
+                $("#idBox").css("color", "blue");
+              }
+            } else {
+              alert("이미 사용중인 ID입니다. 다른 ID를 사용해주세요!");
+            }
+          });
         }
       }
     });
@@ -258,29 +277,29 @@
         alert("닉네임을 입력해주세요!");
         return;
       } else {
-        // $.ajax({
-          //   url: "/idCheck.members",
-          //   data: {
-          //     id: $("#id").val()
-          //   }
-          // }).done(function (resp) {
-          //   if (resp == "false") {
-          //     let isIdUse = confirm("사용 가능한 아이디입니다. 사용하시겠습니까?");
-          //     if (isIdUse) {
-          //       $("#idBox").css("color", "green");
-          //     } else {
-          //       $("#idBox").css("color", "blue");
-          //     }
-          //   } else {
-          //     alert("이미 사용중인 ID입니다. 다른 ID를 사용해주세요!");
-          //   }
-          // });
-          alert("중복체크 미구현");
+        $.ajax({
+          type: "POST",
+          url: "/user/nicknameCheck",
+          data: {
+            nickname: $("#nickname").val()
+          }
+        }).done(function (resp) {
+          if (resp.result === true) {
+            let isNicknameUse = confirm("사용 가능한 닉네임입니다. 사용하시겠습니까?");
+            if (isNicknameUse) {
+              $("#nicknameBox").css("color", "green");
+            } else {
+              $("#nicknameBox").css("color", "blue");
+            }
+          } else {
+            alert("이미 사용중인 닉네임입니다. 다른 닉네임을 사용해주세요!");
+          }
+        });
       }
     });
 
     $("#return").on("click", function () {
-      location.href="{{ url_for('main.login_page') }}";
+      location.href = "{{ url_for('main.login_page') }}";
     });
   </script>
 </body>

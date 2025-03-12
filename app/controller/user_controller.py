@@ -1,11 +1,13 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from app.core.extension import bcrypt
 from app.core.database import db
 from flask_jwt_extended import (create_access_token, get_jwt_identity,)
 from datetime import timedelta
 from app.core.auth import user_required
-
 import uuid
+from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
+db = client.dbyurucamp1
 
 router = Blueprint("user", __name__, url_prefix="/user")
 
@@ -43,28 +45,27 @@ def login():
 
 @router.route('/signup', methods=['POST'])
 def sign_up():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get("password")
-
-    if not username or not password:
-        return jsonify({"error":"사용자명과 비밀번호는 필수입니다."}), 400
-
-    if db.users.find_one({"username": username}):
-        return jsonify({"error":"이미 존재하는 사용자명입니다."}), 400
-
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    name = request.form["name"]
+    id = request.form["id"]
+    pw = request.form["pw"]
+    nickname = request.form["nickname"]
+    division = request.form["division"]
+    generation = request.form["generation"]
+    hashed_password = bcrypt.generate_password_hash(pw).decode('utf-8')
 
     user_data = {
-        "public_id": str(uuid.uuid4()),
-        "username" : username,
-        "password" : hashed_password,
+        "user_id": id,
+        "user_pw": hashed_password,
+        "name": name,
+        "nickname": nickname,
+        "division": division,
+        "generation": int(generation),
         "role": "user"
     }
 
-    db.users.insert_one(user_data)
+    result = db.users.insert_one(user_data)
 
-    return jsonify({"message" : "회원가입이 완료되었습니다."}), 201
+    return render_template('registerResult.html', inserted_id=result.inserted_id)
 
 
 @router.route('/info', methods=['GET'])
@@ -84,3 +85,15 @@ def get_user_info():
     }
 
     return jsonify(user_info), 200
+
+@router.route('/idCheck', methods=['POST'])
+def idCheck():
+    id_receive = request.form['id']    
+    element = db.users.find_one({'user_id':id_receive})
+    return jsonify({'result':element is None})
+
+@router.route('/nicknameCheck', methods=['POST'])
+def nicknameCheck():
+    nickname_receive = request.form['nickname']    
+    element = db.users.find_one({'nickname':nickname_receive})
+    return jsonify({'result':element is None})

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        insertedId = "{{ inserted_id | default('null') }}";
+        if (insertedId !== null) {
+            alert("가입을 성공! 확인을 누르면 로그인 창으로 돌아갑니다.");
+        }else {
+            alert("가입 실패! 문제 지속 시 관리자에게 문의하세요");
+        }
+        window.location.href = "{{ url_for('main.login_page') }}";
+    </script>
+</body>
+</html>
