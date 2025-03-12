@@ -41,7 +41,7 @@
         <table class="min-w-full divide-y divide-gray-200 bg-white text-xl">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-center text-base font-medium text-gray-500 uppercase tracking-wider">체크박스</th>
+                    <th scope="col" class="pl-4 py-3 text-center text-base font-medium text-gray-500 uppercase tracking-wider">체크</th>
                     <th scope="col" class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">품목명</th>
                     <th scope="col" class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">종류</th>
                     <th scope="col" class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">개수</th>
@@ -51,10 +51,12 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for item in items %}
                 <tr class="{% if item.is_required %}bg-red-50{% elif item.is_recommended %}bg-yellow-50{% endif %}">
-                    <td class="px-6 py-4 whitespace-nowrap">
-<!--                        <input type="checkbox" class="w-6 h-6 rounded border-gray-300 text-custom focus:ring-custom"/>-->
-                        <input type="checkbox" class="item-checkbox w-6 h-6 rounded border-gray-300 text-custom focus:ring-custom" data-id="{{ item._id }}" {% if item._id in checked_items %}checked{% endif %}/>
-                    </td>
+                    <td class="pl-4 py-4 whitespace-nowrap text-center">
+                        <div class="flex justify-center items-center">
+                          <input type="checkbox" class="item-checkbox w-6 h-6 rounded border-gray-300 text-custom focus:ring-custom"
+                                 data-id="{{ item._id }}" {% if item._id in checked_items %}checked{% endif %}/>
+                        </div>
+                      </td>                      
                     <td class="px-6 py-4 whitespace-nowrap">
                         {% if item.is_required %}
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 mr-2">필수</span>
