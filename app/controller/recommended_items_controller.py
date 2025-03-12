@@ -141,9 +141,10 @@ def recommended_items_page():
     remaining_items = max(0, total_items - skip)
     limit_value = min(per_page, remaining_items)
 
-    # 아이템 조회 (내림차순 정렬 + 페이지네이션)
-    # 수정된 코드
-    items_cursor = items_collection.find(search_query).sort("shipped_count", -1).skip(skip).limit(limit_value)
+    # 아이템 조회 (내림차순 정렬 + 페이지네이션) 수정 r2
+    items_cursor = items_collection.find(search_query) \
+        .sort([("shipped_count", -1), ("_id", 1)]) \
+        .skip(skip).limit(per_page)
 
     items = list(items_cursor)
 
