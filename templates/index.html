@@ -104,9 +104,14 @@
             {% endif %}
         </div>
     </div>
-
-    <div class="container" id="buttonContainer">
-        <!-- 버튼은 JavaScript로 동적 생성됩니다 -->
+    <div class="buttonBox" style="padding-right: 3rem;">
+        {% if user_details %}
+            <span class="text-sm font-bold ">{{ user_details.get('division') }} {{ user_details.get('generation')  }}기 {{ user_details.get('name')  }}</span>
+            <span class="text-sm font-medium mr-5"> 님, 환영합니다!</span>
+            <a href="{{ url_for('user.logout') }}"><button type="button" class="btn btn-outline-dark">로그아웃</button></a>
+        {% else %}
+            <a href="{{ url_for('main.login_page') }}"><button type="button" class="btn btn-outline-dark">로그인</button></a>
+        {% endif %}
     </div>
 
     <!-- 이 부분은 절대 지우지 마세요. -->

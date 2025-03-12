@@ -1,18 +1,24 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
-from app.core.extension import bcrypt
 from app.core.database import db
-from flask_jwt_extended import (create_access_token, get_jwt_identity,get_jwt)
-from datetime import timedelta
+from flask_jwt_extended import get_jwt_identity,verify_jwt_in_request
 from app.core.auth import user_required
 from bson.objectid import ObjectId
 
-import uuid
 
 router = Blueprint("my_list", __name__, url_prefix="/my-list")
 
 @router.route('/check-list', methods=['GET'])
 @user_required()
 def items(user_id=None):
+    current_user = None
+    user_details = None
+    try:
+        verify_jwt_in_request(optional=True)
+        current_user = get_jwt_identity()
+        user_details = db.users.find_one({"username": current_user})
+    except Exception:
+        pass
+
     # 현재 페이지와 페이지당 항목 수 가져오기
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -83,6 +89,7 @@ def items(user_id=None):
         'my_item/my_item.html',
         user_name=user_name,
         user_division=user_division,
+        user_details = user_details,
         user_generation=user_generation,
         items=items,
         item_types=item_types,
