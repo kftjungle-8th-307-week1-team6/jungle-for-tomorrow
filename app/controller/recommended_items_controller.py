@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, flash
 from app.core.extension import bcrypt
 from app.core.database import db
 from bson import ObjectId
@@ -105,3 +105,26 @@ def recommended_items_page():
 # @router.route('/setting', methods=['GET'])
 # def admin_require_item_setting_page():
 #     return render_template("admin/layout.html")
+
+@router.route('/item/<string:id>/save', methods=['POST'])
+def save_item(item_id):
+    try:
+        user_id = "67cf70db766c89c15fd3f67c" # 임시
+
+        item_oid = ObjectId(item_id)
+        user_oid = ObjectId(user_id)
+
+        item = db.items.find_one({"_id": item_oid})
+        if not item:
+            flash("아이템을 찾을 수 없습니다.","error")
+            return jsonify({"result": "failure"})
+        db.users.update_one(
+            {"_id": user_oid},
+            {"$addToSet": {"saved_items": item_oid}}
+        )
+
+        flash("아이템이 내 준비물 목록에 추가되었습니다.", "success")
+        return jsonify({"result": "success"})
+    except Exception as e:
+        flash(f"오류가 발생했습니다.: {str(e)}", "error")
+        return jsonify({"result": "failure"})

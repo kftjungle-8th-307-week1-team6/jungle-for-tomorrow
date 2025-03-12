@@ -1,0 +1,269 @@
+{% extends "layout.html" %}
+
+{% block title %}내 준비물 관리{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-[98%] px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">
+    <div class="mb-6">
+        <nav class="flex justify-center space-x-4" aria-label="주 메뉴">
+            <a href="{{ url_for('my_list.items', filter='all') }}" class="px-4 py-2 text-base font-medium {% if filter == 'all' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">전체</a>
+            <a href="{{ url_for('my_list.items', filter='required') }}" class="px-4 py-2 text-base font-medium {% if filter == 'required' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">필수 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='recommended') }}" class="px-4 py-2 text-base font-medium {% if filter == 'recommended' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">추천 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='normal') }}" class="px-4 py-2 text-base font-medium {% if filter == 'normal' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">일반 준비물</a>
+        </nav>
+    </div>
+    <div class="mb-6">
+        <nav class="flex justify-center space-x-4" aria-label="서브 메뉴">
+            <a href="{{ url_for('my_list.items', filter=filter, type='electronics') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'electronics' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">전자기기</a>
+            <a href="{{ url_for('my_list.items', filter=filter, type='stationery') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'stationery' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">학습&문구</a>
+            <a href="{{ url_for('my_list.items', filter=filter, type='other') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'other' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">기타</a>
+        </nav>
+    </div>
+    <div class="mb-6 flex justify-end w-full max-w-7xl">
+        <button class="inline-flex items-center px-4 py-2 text-base font-medium text-white bg-custom rounded-button hover:bg-custom/90" onclick="document.getElementById('modal-backdrop').classList.remove('hidden'); document.getElementById('modal-container').classList.remove('hidden');">
+            <i class="fas fa-plus mr-2"></i>
+            등록
+        </button>
+    </div>
+    <div class="bg-white shadow rounded-lg overflow-hidden w-full mx-auto p-8">
+        <table class="min-w-full divide-y divide-gray-200 bg-white text-xl">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-center text-base font-medium text-gray-500 uppercase tracking-wider">체크박스</th>
+                    <th scope="col" class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">품목명</th>
+                    <th scope="col" class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">종류</th>
+                    <th scope="col" class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">개수</th>
+                    <th scope="col" class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">관리</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for item in items %}
+                <tr class="{% if item.is_required %}bg-red-50{% elif item.is_recommended %}bg-yellow-50{% endif %}">
+                    <td class="px-6 py-4 whitespace-nowrap">
+<!--                        <input type="checkbox" class="w-6 h-6 rounded border-gray-300 text-custom focus:ring-custom"/>-->
+                        <input type="checkbox" class="item-checkbox w-6 h-6 rounded border-gray-300 text-custom focus:ring-custom" data-id="{{ item._id }}" {% if item._id in checked_items %}checked{% endif %}/>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if item.is_required %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 mr-2">필수</span>
+                        {% elif item.is_recommended %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mr-2">추천</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mr-2">일반</span>
+                        {% endif %}
+                        {{ item.name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ item.type }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ item.quantity }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <!-- 수정 및 삭제 버튼 -->
+                        {% if not item.is_required and not item.is_recommended %}
+                        <button onclick="editItem('{{ item._id }}')" class="text-custom hover:text-custom/80 mr-3"><i class="fas fa-pencil"></i></button>
+                        {% elif not item.is_required %}
+                        <button disabled class="text-gray-400 mr-3"><i class="fas fa-pencil"></i></button>
+                        {% else %}
+                        <button disabled class="text-gray-400 mr-3"><i class="fas fa-pencil"></i></button>
+                        {% endif %}
+
+                        {% if not item.is_required %}
+                        <button onclick="confirmDelete('{{ item._id }}')" class="text-red hover:text-red/80"><i class="fas fa-trash"></i></button>
+                        {% else %}
+                        <button disabled class="text-gray-400"><i class="fas fa-trash"></i></button>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 페이지네이션 -->
+        <div class="mt-6 flex justify-center space-x-2">
+            {% if page > 1 %}
+            <a href="{{ url_for('my_list.items', page=page - 1, per_page=per_page, filter=filter, type=item_type) }}"
+               class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">이전</a>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+            <a href="{{ url_for('my_list.items', page=p, per_page=per_page, filter=filter, type=item_type) }}"
+               class="px-4 py-2 {% if p == page %}bg-custom text-white{% else %}bg-gray-200{% endif %} rounded-md hover:bg-gray-300">
+                {{ p }}
+            </a>
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <a href="{{ url_for('my_list.items', page=page + 1, per_page=per_page, filter=filter, type=item_type) }}"
+               class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">다음</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 등록/수정 모달 -->
+<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity hidden" id="modal-backdrop"></div>
+<div class="fixed inset-0 z-10 overflow-y-auto hidden" id="modal-container">
+    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                        <h3 class="text-xl font-semibold leading-6 text-gray-900 mb-4" id="modal-title">내 준비물 등록</h3>
+                        <form id="item-form" method="POST" action="{{ url_for('my_list.add_item') }}">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">품목명</label>
+                                <input type="text" name="name" id="item-name" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required/>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">종류</label>
+                                <select name="type" id="item-type" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required>
+                                    {% for type in item_types %}
+                                    <option value="{{ type._id }}">{{ type.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">개수</label>
+                                <input type="number" name="quantity" id="item-quantity" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" min="1" value="1" required/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <button type="submit" form="item-form" class="inline-flex w-full justify-center rounded-button bg-custom px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-custom/90 sm:ml-3 sm:w-auto">저장</button>
+                <button type="button" class="mt-3 inline-flex w-full justify-center rounded-button bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" id="modal-cancel">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity hidden" id="delete-modal-backdrop"></div>
+<div class="fixed inset-0 z-10 overflow-y-auto hidden" id="delete-modal-container">
+    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <h3 class="text-xl font-semibold leading-6 text-gray-900">삭제 확인</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500">정말로 이 항목을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <a href="#" id="delete-link" class="inline-flex w-full justify-center rounded-button bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">삭제</a>
+                <button type="button" class="mt-3 inline-flex w-full justify-center rounded-button bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" id="delete-cancel">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // 모달 닫기
+    document.getElementById('modal-cancel').addEventListener('click', function() {
+        document.getElementById('modal-backdrop').classList.add('hidden');
+        document.getElementById('modal-container').classList.add('hidden');
+    });
+
+    document.getElementById('delete-cancel').addEventListener('click', function() {
+        document.getElementById('delete-modal-backdrop').classList.add('hidden');
+        document.getElementById('delete-modal-container').classList.add('hidden');
+    });
+
+    // 각 체크박스에 변경 이벤트 리스너 추가
+    document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const itemId = this.getAttribute('data-id');
+            updateItemCheckStatus(itemId, this.checked);
+        });
+    });
+
+    // 체크 상태 업데이트 함수
+    function updateItemCheckStatus(itemId, isChecked) {
+        fetch(`/my-list/items/${itemId}/check`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ checked: isChecked })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('체크 상태 업데이트에 실패했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // 오류 시 체크박스 상태 되돌리기
+            this.checked = !this.checked;
+        });
+    }
+
+    // 항목 수정
+    function editItem(id) {
+    // 현재 행에서 데이터 가져오기
+    const row = event.target.closest('tr');
+
+    // 필수/추천 항목인지 확인
+    const nameCell = row.cells[1].textContent;
+    if (nameCell.includes('필수') || nameCell.includes('추천')) {
+        return; // 필수/추천 항목은 수정 불가
+    }
+
+    // 폼 액션 변경
+    const form = document.getElementById('item-form');
+    form.action = `/my-list/items/${id}/edit`;
+
+    // 모달 제목 변경
+    document.getElementById('modal-title').textContent = '내 준비물 수정';
+
+    // 품목명에서 필수/추천/일반 라벨 제거
+    const name = nameCell.replace(/필수|추천|일반/g, '').trim();
+    const type = row.cells[2].textContent;
+    const quantity = row.cells[3].textContent;
+
+    // 폼 필드 채우기
+    document.getElementById('item-name').value = name;
+    document.getElementById('item-quantity').value = quantity;
+
+    // 종류 선택 드롭다운 설정
+    const typeSelect = document.getElementById('item-type');
+    for (let i = 0; i < typeSelect.options.length; i++) {
+        if (typeSelect.options[i].text === type) {
+            typeSelect.selectedIndex = i;
+            break;
+        }
+    }
+
+    // 모달 표시
+    document.getElementById('modal-backdrop').classList.remove('hidden');
+    document.getElementById('modal-container').classList.remove('hidden');
+}
+
+function confirmDelete(id) {
+    // 현재 행에서 데이터 가져오기
+    const row = event.target.closest('tr');
+
+    // 필수 항목인지 확인
+    const nameCell = row.cells[1].textContent;
+    if (nameCell.includes('필수')) {
+        return; // 필수 항목은 삭제 불가
+    }
+
+    // 백틱을 사용하여 URL 경로 올바르게 구성
+    document.getElementById('delete-link').href = `/my-list/items/${id}/delete`;
+
+    // 모달 표시
+    document.getElementById('delete-modal-backdrop').classList.remove('hidden');
+    document.getElementById('delete-modal-container').classList.remove('hidden');
+}
+
+
+</script>
+{% endblock %}
+
+

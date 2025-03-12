@@ -20,10 +20,13 @@ def create_app(config=None):
     from app.controller.user_controller import router as user_router
     from app.controller.main_controller import router as main_router
     from app.controller.recommended_items_controller import router as recommended_items_router
+    from app.controller.my_list_controller import router as mylist_router
 
     app.register_blueprint(admin_router)
     app.register_blueprint(user_router)
     app.register_blueprint(main_router)
     app.register_blueprint(recommended_items_router)
+    app.register_blueprint(mylist_router)
 
     return app
+
