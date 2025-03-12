@@ -5,6 +5,7 @@ from app.core.database import db
 from flask_jwt_extended import (create_access_token, get_jwt_identity, create_refresh_token, get_jwt)
 from datetime import timedelta, datetime
 from app.core.auth import user_required
+from bson.objectid import ObjectId
 
 router = Blueprint("user", __name__, url_prefix="/user")
 
@@ -119,3 +120,68 @@ def nicknameCheck():
     nickname_receive = request.form['nickname']    
     element = db.users.find_one({'nickname':nickname_receive})
     return jsonify({'result':element is None})
+
+
+@router.route('/management', methods=['GET'])
+@user_required()
+def profile():
+    try:
+        # JWT 토큰에서 사용자 ID 가져오기
+        current_user = get_jwt_identity()
+        user_details = db.users.find_one({"username": current_user})
+
+        if not user_details:
+            return jsonify({"error": "사용자 정보를 찾을 수 없습니다."}), 404
+
+        # 사용자 정보 템플릿에 전달
+        return render_template(
+            'user/user_info.j2',
+            user_details=user_details,
+            error=request.args.get('error')
+        )
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+
+
+@router.route('/update_profile', methods=['POST'])
+@user_required()
+def update_profile(user_id=None):
+    try:
+        # 폼 데이터 가져오기
+        name = request.form.get('name', '')
+        nickname = request.form.get('nickname', '')
+        generation = request.form.get('generation', '')
+        division = request.form.get('division', '')
+
+        # 입력 유효성 검사
+        if not name or not nickname:
+            return redirect(url_for('user.profile', error='이름과 닉네임은 필수 입력 항목입니다.'))
+
+        # 사용자 정보 업데이트
+        update_data = {
+            "name": name,
+            "nickname": nickname,
+            "division": division
+        }
+
+        # 기수가 입력된 경우에만 업데이트
+        if generation:
+            try:
+                update_data["generation"] = int(generation)
+            except ValueError:
+                return redirect(url_for('user.profile', error='기수는 숫자로 입력해주세요.'))
+
+        # 데이터베이스 업데이트
+        db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+
+        # 성공 메시지와 함께 홈페이지로 리다이렉트
+        flash('프로필이 성공적으로 업데이트되었습니다.', 'success')
+        return redirect(url_for('main.home'))
+
+    except Exception as e:
+        # 오류 발생 시 프로필 페이지로 리다이렉트
+        return redirect(url_for('user.profile', error=f'프로필 업데이트 중 오류가 발생했습니다: {str(e)}'))

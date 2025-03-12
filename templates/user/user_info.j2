@@ -1,0 +1,56 @@
+{% extends "layout.j2" %}
+
+{% block title %}내 정보 관리{% endblock %}
+
+{% block content %}
+<style>
+  input[readonly] {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+    border-color: #d1d5db;
+  }
+</style>
+<main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-3xl mx-auto bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-8 py-6 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">계정 정보 수정</h1>
+        </div>
+        {% if error %}
+        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+            <p class="text-red-700">{{ error }}</p>
+        </div>
+        {% endif %}
+        <form class="px-8 py-6 space-y-6" method="POST" action="{{ url_for('user.update_profile') }}">
+            <div>
+                <label for="userId" class="block text-sm font-medium text-gray-700">아이디 <span class="text-xs text-gray-500">(수정 불가)</span></label>
+                <input type="text" id="userId" name="userId" value="{{ user_details.username }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" readonly/>
+            </div>
+            <div class="mt-6">
+                <label for="name" class="block text-sm font-medium text-gray-700">이름</label>
+                <input type="text" id="name" name="name" value="{{ user_details.name }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-custom focus:border-custom"/>
+            </div>
+            <div class="mt-6">
+                <label for="nickname" class="block text-sm font-medium text-gray-700">닉네임</label>
+                <input type="text" id="nickname" name="nickname" value="{{ user_details.nickname }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-custom focus:border-custom"/>
+            </div>
+            <div class="mt-6">
+                <label for="generation" class="block text-sm font-medium text-gray-700">기수</label>
+                <input type="number" id="generation" name="generation" value="{{ user_details.generation }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-custom focus:border-custom"/>
+            </div>
+            <div class="mt-6">
+                <label for="division" class="block text-sm font-medium text-gray-700">소속</label>
+                <select id="division" name="division" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-custom focus:border-custom">
+                    <option value="정글" {% if user_details.division == '정글' %}selected{% endif %}>정글</option>
+                    <option value="정글 게임랩" {% if user_details.division == '정글 게임랩' %}selected{% endif %}>정글 게임랩</option>
+                    <option value="정글 게임테크랩" {% if user_details.division == '정글 게임테크랩' %}selected{% endif %}>정글 게임테크랩</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-4 mt-6">
+                <button type="button" class="!rounded-button bg-gray-100 px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200" onclick="location.href='{{ url_for('main.home') }}'">취소</button>
+                <button type="submit" class="!rounded-button bg-custom px-6 py-2 text-sm font-medium text-white hover:bg-custom/90">저장</button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}
