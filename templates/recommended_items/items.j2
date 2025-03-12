@@ -9,19 +9,47 @@
   <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
   <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
+
+  <style>
+    nav div span.titlelogo {
+        box-sizing: border-box;
+        font-family: "Black Han Sans", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+    }
+    input.focused{
+      width: 480px;
+      transition: width 0.3s;
+    }
+    input.not_focused{
+      width: 240px;
+      transition: width 0.3s;
+    }
+  </style>
+
+  <!-- 이 부분은 절대 지우지 마세요. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gray-50 min-h-screen">
   <nav class="bg-white shadow">
     <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex-shrink-0 flex items-center">
-          <img class="h-8 w-auto" src="https://ai-public.creatie.ai/gen_page/logo_placeholder.png" alt="로고">
+          <img class="h-8 w-auto" src="/static/logo.jpg" alt="로고">
+          <span class="titlelogo font-bold ml-2 text-3xl">내일은 정글</span>  
         </div>
         <div class="flex items-center">
           {% if  user_details %}
             <span class="text-sm font-bold ">{{ user_details.get('division') }} {{ user_details.get('generation')  }}기 {{ user_details.get('name')  }}</span>
             <span class="text-sm font-medium mr-5"> 님, 환영합니다!</span>
-            <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그아웃</button>
+            
+            <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">
+            
+              <a href="{{ url_for('user.logout') }}" class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그아웃</a>
+            </button>
+
           {% else %}
             <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그인</button>
           {% endif %}
@@ -30,8 +58,8 @@
     </div>
   </nav>
 
-  <main class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-2xl font-bold text-gray-900 mb-8">추천 아이템</h1>
+  <main class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-48 py-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-8">추천 준비물</h1>
     
     <div class="space-y-6">
       <div class="flex flex-wrap gap-2">
@@ -41,25 +69,30 @@
         {% endfor %}
       </div>
 
-      <div class="flex gap-4 items-center">
-        <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium" id="createNewItem">
-          <i class="fas fa-plus mr-2"></i>새 아이템 추가
+      <div class="flex flex-wrap gap-4 items-center">
+        <!-- 버튼 -->
+        <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium min-w-[160px]" id="createNewItem">
+          <i class="fas fa-plus mr-2"></i>새 준비물 추가
         </button>
-        <div class="flex-1 flex gap-4">
-          <div class="w-48">
+
+        <!-- 검색 기능 & 드롭다운 -->
+        <div class="flex  gap-4 md:flex-nowrap " style="width: calc(100% - 176px);">
+          <div class="ml-auto w-48 min-w-36">
             <select class="w-full border-gray-300 focus:border-custom focus:ring-custom text-sm">
-              <option  value="none" disabled>=== 선택 ===</option>
+              <option value="none" disabled>=== 선택 ===</option>
               <option value="item_name" selected>준비물 이름</option>
-              <option value="description" >추천하는 이유</option>
+              <option value="description">추천하는 이유</option>
               <option value="author">작성자</option>
             </select>
           </div>
-          <div class="flex-1 relative">
-            <input id="search_field" type="text" placeholder="검색" class="w-full pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">
+          <div class="relative w-full md:w-auto">
+            <input id="search_field" type="text" placeholder="검색"
+              class="w-full md:w-[240px] transition-all duration-300 ease-in-out pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
           </div>
         </div>
       </div>
+
 
       <!-- MongoDB에서 가져온 아이템들을 순회하며 카드로 표시 -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -165,7 +198,7 @@
     <div class="bg-white p-6 rounded shadow-lg w-full max-w-lg">  
       <h2 class="text-xl font-bold mb-4">새 아이템 추가</h2>
       <form>
-        <input type="hidden" id="newAuthorName" value="{{ user_details.get('name')  }}">
+        <input type="hidden" id="newAuthorName" value="{{ user_details.get('name') }}">
         <input type="hidden" id="newAuthorDivision" value="{{ user_details.get('division') }}">
         <input type="hidden" id="newAuthorGeneration" value="{{ user_details.get('generation') }}">
         <div class="mb-4">
@@ -460,6 +493,20 @@
       }
     });
 
+    // 검색 상자 클릭 시 좌측으로 뻗어나감.
+    const searchField = document.getElementById('search_field');
+
+    searchField.addEventListener('focus', () => {
+      // not-focused 클래스 제거 및 focused 클래스 추가
+      searchField.classList.remove('not_focused');  
+      searchField.classList.add('focused');
+    });
+
+    searchField.addEventListener('blur', () => {
+      // focused 클래스 제거 및 not-focuced 클래스 추가
+      searchField.classList.remove('focused');
+      searchField.classList.add('not_focused');
+    });
     
     // 검색 기능 구현 (엔터 키 입력 시에만 반영)
     document.getElementById('search_field').addEventListener('keydown', (e) => {

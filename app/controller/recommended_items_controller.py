@@ -105,7 +105,7 @@ def recommended_items_page():
 
     search_keyword = parameter_dict.get('search', '').strip()
     search_field = parameter_dict.get('search_field', '')
-    if search_keyword and search_field in ['item_name', 'description', 'author']:
+    if search_keyword and search_field in ['item_name', 'description', 'author_name']:
         search_query[search_field] = {"$regex": search_keyword, "$options": "i"}
 
     # 페이지네이션 처리
