@@ -89,7 +89,18 @@
 
       <div class="flex flex-wrap gap-4 items-center">
         <!-- 버튼 -->
-        
+
+        <!-- 관리자용 일괄 삭제 버튼 추가 -->
+        {% if is_admin %}
+            <button id="batchDeleteBtn" class="!rounded-button bg-red-500 text-white px-4 py-2 text-sm font-medium min-w-[160px] hidden">
+              <i class="fas fa-trash mr-2"></i>선택 항목 삭제
+            </button>
+            <button id="selectModeBtn" class="!rounded-button bg-gray-500 text-white px-4 py-2 text-sm font-medium">
+              <i class="fas fa-check-square mr-2"></i>선택 모드
+            </button>
+        {% endif %}
+
+
         {% if   user_details %}
           <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium min-w-[160px]" id="createNewItem">
             <i class="fas fa-plus mr-2"></i>새 준비물 추가
@@ -121,7 +132,13 @@
       <!-- MongoDB에서 가져온 아이템들을 순회하며 카드로 표시 -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for item in items %}
-        <div id="{{ item._id }}" class="bg-white rounded-lg shadow p-6 space-y-4">
+        <div id="{{ item._id }}" class="bg-white rounded-lg shadow p-6 space-y-4 relative">
+        <!-- 관리자용 체크박스 추가 -->
+        {% if is_admin %}
+        <div class="item-checkbox absolute top-2 right-2 hidden">
+          <input type="checkbox" class="h-5 w-5 text-custom focus:ring-custom border-gray-300 rounded" data-id="{{ item._id }}">
+        </div>
+        {% endif %}
           <div class="flex justify-between items-start">
             <div class="flex items-center gap-2">
               <h3 class="text-lg font-medium rec-item-name">{{ item.item_name }}</h3>
@@ -539,6 +556,71 @@
         window.location.search = params.toString();
       }
     });
+    // 관리자용 일괄 삭제 기능
+    {% if is_admin %}
+    let selectMode = false;
+    // 선택 모드 토글
+  document.getElementById('selectModeBtn').addEventListener('click', function() {
+    selectMode = !selectMode;
+    const checkboxes = document.querySelectorAll('.item-checkbox');
+    const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+
+    if (selectMode) {
+      // 선택 모드 활성화
+      this.textContent = '선택 모드 해제';
+      this.classList.remove('bg-gray-500');
+      this.classList.add('bg-blue-500');
+      checkboxes.forEach(cb => cb.classList.remove('hidden'));
+      batchDeleteBtn.classList.remove('hidden');
+    } else {
+      // 선택 모드 비활성화
+      this.textContent = '선택 모드';
+      this.classList.remove('bg-blue-500');
+      this.classList.add('bg-gray-500');
+      checkboxes.forEach(cb => {
+        cb.classList.add('hidden');
+        cb.querySelector('input').checked = false;
+      });
+      batchDeleteBtn.classList.add('hidden');
+    }
+  });
+
+  // 일괄 삭제 버튼 클릭 이벤트
+  document.getElementById('batchDeleteBtn').addEventListener('click', function() {
+    const selectedItems = Array.from(document.querySelectorAll('.item-checkbox input:checked'))
+      .map(checkbox => checkbox.getAttribute('data-id'));
+
+    if (selectedItems.length === 0) {
+      alert('삭제할 항목을 선택해주세요.');
+      return;
+    }
+
+    if (confirm(`선택한 ${selectedItems.length}개 항목을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
+      // 서버에 삭제 요청
+      fetch('/admin/items/batch-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ item_ids: selectedItems })
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.result === 'success') {
+          alert(`${result.deleted_count}개 항목이 삭제되었습니다.`);
+          // 페이지 새로고침
+          window.location.reload();
+        } else {
+          alert('삭제 중 오류가 발생했습니다: ' + result.reason);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('삭제 중 오류가 발생했습니다.');
+      });
+    }
+  });
+  {% endif %}
 
   </script>
 </body>
