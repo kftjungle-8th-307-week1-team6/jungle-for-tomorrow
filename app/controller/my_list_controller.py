@@ -30,7 +30,8 @@ def items(user_id=None):
         "$or": [
             {"_id": {"$in": saved_item_ids}},  # 사용자가 저장한 아이템
             {"is_required": True}  # 필수 아이템은 항상 표시
-        ]
+        ],
+        "is_deleted": {"$ne": True}
     }
 
     # 필터링 적용
@@ -40,7 +41,8 @@ def items(user_id=None):
         query = {
             "$and": [
                 {"_id": {"$in": saved_item_ids}},
-                {"is_recommended": True}
+                {"is_recommended": True},
+                {"is_deleted": {"$ne": True}}  # 삭제된 아이템 제외
             ]
         }
     elif filter_type == 'normal':
@@ -48,7 +50,8 @@ def items(user_id=None):
             "$and": [
                 {"_id": {"$in": saved_item_ids}},
                 {"is_required": False},
-                {"is_recommended": False}
+                {"is_recommended": False},
+                {"is_deleted": {"$ne": True}}  # 삭제된 아이템 제외
             ]
         }
     # 아이템 타입 가져오기

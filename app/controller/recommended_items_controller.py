@@ -54,16 +54,26 @@ def delete_item(object_id):
     try:
         item_obj_id = ObjectId(object_id)
     except InvalidId:
-        return jsonify({"result": "failure", "reason": "Invalid ObjectId format"}), 400 
+        return jsonify({"result": "failure", "reason": "Invalid ObjectId format"}), 400
 
-    deleted_result = db.items.delete_one({"_id": item_obj_id})
-    if deleted_result.deleted_count > 0:
-        return jsonify({"result": "success"})
-    else:
+    try:
+        # 논리적 삭제 구현 (is_deleted 필드를 True로 설정)
+        update_result = db.items.update_one(
+            {"_id": item_obj_id},
+            {"$set": {"is_deleted": True}}
+        )
+
+        if update_result.modified_count > 0:
+            return jsonify({"result": "success"})
+        else:
+            return jsonify({"result": "failure", "reason": "아이템을 찾을 수 없습니다."}), 404
+    except Exception as e:
+        print(f"Error deleting item: {str(e)}")
         return jsonify({"result": "failure", "reason": "삭제 오류! Flask 콘솔 참조."}), 500
 
 
-# 아이템을 수정. # action="{{ url_for('recommended_items.edit_item') }}" method=""
+
+# 아이템을 수정합니다. # action="{{ url_for('recommended_items.edit_item') }}" method=""
 @router.route('/item/<object_id>', methods=['PUT'])
 def edit_item(object_id):
     try:
@@ -89,6 +99,7 @@ def recommended_items_page():
     items_collection = db.items
     current_user = None
     user_details = None
+    is_admin = False
     search_query = {}
 
     # JWT 처리
@@ -96,6 +107,9 @@ def recommended_items_page():
         verify_jwt_in_request(optional=True)
         current_user = get_jwt_identity()
         user_details = db.users.find_one({"username": current_user})
+
+        if user_details and user_details.get('role') == "admin":
+            is_admin = True
     except Exception:
         pass
 
@@ -109,6 +123,8 @@ def recommended_items_page():
     if search_keyword and search_field in ['item_name', 'description', 'author_name']:
         search_query[search_field] = {"$regex": search_keyword, "$options": "i"}
 
+    # 삭제된 아이템 제외
+    search_query["is_deleted"] = {"$ne": True}
     # 페이지네이션 처리
     page = int(parameter_dict.get('page', 1))
     per_page = int(parameter_dict.get('per_page', 10))
@@ -159,6 +175,7 @@ def recommended_items_page():
         categories=categories,
         current_user=current_user,
         user_details=user_details,
+        is_admin=is_admin,
         pagination={
             'page': page,
             'per_page': per_page,
@@ -174,6 +191,91 @@ def recommended_items_page():
         }
     )
 
+
+# @router.route('/list', methods=['GET'])
+# def recommended_items_page():
+#     parameter_dict = request.args.to_dict()
+#     items_collection = db.items
+#     current_user = None
+#     user_details = None
+#     search_query = {} # 필요할 때만 사용, 필터링 조건을 담음 => 없으면 전체 조회
+
+#     # JWT
+#     try:
+#         verify_jwt_in_request(optional=True)
+#         current_user = get_jwt_identity()
+#         print(current_user)
+#         user_details = db.users.find_one({"username": current_user})
+#     except Exception:
+#         pass
+
+#     # 1. 카테고리 필터
+#     category = parameter_dict.get('category')
+#     if category:
+#         search_query['category'] = category
+    
+#     # 2. 검색 조건
+#     search_keyword = parameter_dict.get('search', '').strip()
+#     search_field = parameter_dict.get('search_field', '')
+#     if search_keyword and search_field in ['item_name', 'description', 'author']:
+#         search_query[search_field] = {"$regex": search_keyword, "$options": "i"}
+
+#     # 페이지네이션 파라미터
+#     page = int(parameter_dict.get('page', 1))
+#     per_page = int(parameter_dict.get('per_page', 10))
+#     skip = (page - 1) * per_page
+
+#     # 전체 문서 수 및 페이지 계산
+#     total_items = items_collection.count_documents(search_query)
+#     total_pages = (total_items + per_page - 1) // per_page  # 올림 계산
+
+#     # 아이템 조회 && 페이지네이션
+#     items_cursor = items_collection.find(search_query).sort("shipped_count", -1).skip(skip).limit(per_page)
+#     items = list(items_cursor)
+
+#     # ObjectId 변환 
+#     for item in items:
+#         item['_id'] = str(item['_id'])
+
+#     # 페이지 범위 계산 ==> Jinja2 템플릿 페이지에서 사용할 것.
+#     start_page = max(1, page - 2)
+#     end_page = min(total_pages, page + 2)
+    
+#     # 페이지 범위 조정 로직
+#     if end_page - start_page < 4:
+#         if page < 3:
+#             end_page = min(5, total_pages)
+#         else:
+#             start_page = max(1, end_page - 4)
+#     pages_range = range(start_page, end_page + 1)
+
+#     categories = ["의료품", "문구/학용품", "서적", "전자기기", "생필품", "가방", "의류", "호신용품", "식품", "기타"]
+
+#     return render_template(
+#         "recommended_items/items.j2",
+#         items=items,
+#         parameter_dict=parameter_dict,
+#         categories=categories,
+#         current_user=current_user,
+#         user_details=user_details,
+#         pagination={
+#             'page': page,
+#             'per_page': per_page,
+#             'total_items': total_items,
+#             'total_pages': total_pages,
+#             'start_page': start_page,
+#             'end_page': end_page,
+#             'pages_range': pages_range,
+#             'has_prev': page > 1,
+#             'prev_num': page - 1,
+#             'has_next': page < total_pages,
+#             'next_num': page + 1
+#         }
+#     )
+
+# @router.route('/setting', methods=['GET'])
+# def admin_require_item_setting_page():
+#     return render_template("admin/layout.html")
 
 @router.route('/item/<string:item_id>/save', methods=['POST'])
 def save_item(item_id):    
