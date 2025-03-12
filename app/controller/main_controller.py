@@ -10,7 +10,6 @@ def home():
     username = None
     user_details = None
     user_role = None
-    user_info = None
     try:
         if request.cookies.get('access_token_cookie'):
             # verify_jwt_in_request는 토큰 유효성을 검사하고 예외를 발생시킬 수 있음
@@ -24,6 +23,7 @@ def home():
     except:
         pass
     return render_template('index.html', user_details=user_details, username=username, user_role=user_role)
+
 @router.route('/loginPage')
 def login_page():
     return render_template('login.html')
