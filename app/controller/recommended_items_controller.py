@@ -54,13 +54,23 @@ def delete_item(object_id):
     try:
         item_obj_id = ObjectId(object_id)
     except InvalidId:
-        return jsonify({"result": "failure", "reason": "Invalid ObjectId format"}), 400 
+        return jsonify({"result": "failure", "reason": "Invalid ObjectId format"}), 400
 
-    deleted_result = db.items.delete_one({"_id": item_obj_id})
-    if deleted_result.deleted_count > 0:
-        return jsonify({"result": "success"})
-    else:
+    try:
+        # 논리적 삭제 구현 (is_deleted 필드를 True로 설정)
+        update_result = db.items.update_one(
+            {"_id": item_obj_id},
+            {"$set": {"is_deleted": True}}
+        )
+
+        if update_result.modified_count > 0:
+            return jsonify({"result": "success"})
+        else:
+            return jsonify({"result": "failure", "reason": "아이템을 찾을 수 없습니다."}), 404
+    except Exception as e:
+        print(f"Error deleting item: {str(e)}")
         return jsonify({"result": "failure", "reason": "삭제 오류! Flask 콘솔 참조."}), 500
+
 
 
 # 아이템을 수정합니다. # action="{{ url_for('recommended_items.edit_item') }}" method=""
@@ -89,6 +99,7 @@ def recommended_items_page():
     items_collection = db.items
     current_user = None
     user_details = None
+    is_admin = False
     search_query = {}
 
     # JWT 처리
@@ -96,6 +107,9 @@ def recommended_items_page():
         verify_jwt_in_request(optional=True)
         current_user = get_jwt_identity()
         user_details = db.users.find_one({"username": current_user})
+
+        if user_details and user_details.get('role') == "admin":
+            is_admin = True
     except Exception:
         pass
 
@@ -109,6 +123,8 @@ def recommended_items_page():
     if search_keyword and search_field in ['item_name', 'description', 'author_name']:
         search_query[search_field] = {"$regex": search_keyword, "$options": "i"}
 
+    # 삭제된 아이템 제외
+    search_query["is_deleted"] = {"$ne": True}
     # 페이지네이션 처리
     page = int(parameter_dict.get('page', 1))
     per_page = int(parameter_dict.get('per_page', 10))
@@ -159,6 +175,7 @@ def recommended_items_page():
         categories=categories,
         current_user=current_user,
         user_details=user_details,
+        is_admin=is_admin,
         pagination={
             'page': page,
             'per_page': per_page,
