@@ -37,6 +37,7 @@
         </button>
     </div>
     <div class="bg-white shadow rounded-lg overflow-hidden w-full mx-auto p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">내 준비물 관리</h2>
         <table class="min-w-full divide-y divide-gray-200 bg-white text-xl">
             <thead class="bg-gray-50">
                 <tr>
@@ -62,9 +63,9 @@
                         {% else %}
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mr-2">일반</span>
                         {% endif %}
-                        {{ item.name }}
+                        {{ item.item_name }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ item.type }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ item.category }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">{{ item.quantity }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <!-- 수정 및 삭제 버튼 -->
@@ -122,11 +123,11 @@
                         <form id="item-form" method="POST" action="{{ url_for('my_list.add_item') }}">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">품목명</label>
-                                <input type="text" name="name" id="item-name" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required/>
+                                <input type="text" name="item_name" id="item-name" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required/>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">종류</label>
-                                <select name="type" id="item-type" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required>
+                                <select name="category" id="item-type" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required>
                                     {% for type in item_types %}
                                     <option value="{{ type._id }}">{{ type.name }}</option>
                                     {% endfor %}
@@ -233,18 +234,18 @@
     document.getElementById('modal-title').textContent = '내 준비물 수정';
 
     // 품목명에서 필수/추천/일반 라벨 제거
-    const name = nameCell.replace(/필수|추천|일반/g, '').trim();
-    const type = row.cells[2].textContent;
+    const item_name = nameCell.replace(/필수|추천|일반/g, '').trim();
+    const category = row.cells[2].textContent;
     const quantity = row.cells[3].textContent;
 
     // 폼 필드 채우기
-    document.getElementById('item-name').value = name;
+    document.getElementById('item-name').value = item_name;
     document.getElementById('item-quantity').value = quantity;
 
     // 종류 선택 드롭다운 설정
     const typeSelect = document.getElementById('item-type');
     for (let i = 0; i < typeSelect.options.length; i++) {
-        if (typeSelect.options[i].text === type) {
+        if (typeSelect.options[i].text === category) {
             typeSelect.selectedIndex = i;
             break;
         }
