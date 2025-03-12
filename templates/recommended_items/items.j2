@@ -13,11 +13,22 @@
   <!-- Pretendard 폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 
+  <!-- 이 부분은 절대 지우지 마세요. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+
   <style>
     *{
       font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", "Apple SD Gothic Neo", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
     }
-    
+      
+    @media screen and (max-width: 500px) {
+      nav div span.titlelogo {
+        display: none;
+      }
+    }
+
     nav div span.titlelogo {
         box-sizing: border-box;
         font-family: "Black Han Sans", sans-serif !important;
@@ -37,12 +48,8 @@
     }
   </style>
 
-  <!-- 이 부분은 절대 지우지 마세요. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen min-w-[400px]">
   <nav class="bg-white shadow">
     <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
