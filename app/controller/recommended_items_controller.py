@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template, flash
+from flask import Blueprint, jsonify, request, render_template
 from app.core.extension import bcrypt
 from app.core.database import db
 from bson import ObjectId
@@ -274,7 +274,6 @@ def save_item(item_id):
 
         item = db.items.find_one({"_id": item_oid})
         if not item:
-            flash("아이템을 찾을 수 없습니다.","error")
             return jsonify({"result": "failure"})
         db.users.update_one(
             {"_id": user_oid},
@@ -282,11 +281,8 @@ def save_item(item_id):
         )
 
         # 해당 id의 아이템의 'shipped_count'를 1 증가시킴
-        db.items.update_one({"_id": item_oid}, {"$inc": {"shipped_count": 1}})    
-
-        flash("아이템이 내 준비물 목록에 추가되었습니다.", "success")
+        db.items.update_one({"_id": item_oid}, {"$inc": {"shipped_count": 1}}) 
         return jsonify({"result": "success", "item_id": item_id, "shipped_count": item['shipped_count']+1 })
     
     except Exception as e:
-        flash(f"오류가 발생했습니다.: {str(e)}", "error")
         return jsonify({"result": "failure"})
