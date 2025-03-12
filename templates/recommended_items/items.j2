@@ -1,3 +1,5 @@
+{% set active_category = parameter_dict.get('category', '전체') %}
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -55,7 +57,7 @@
       <div class="flex justify-between h-16">
         <div class="flex-shrink-0 flex items-center">
             <a href="{{ url_for('main.home') }}" class="flex items-center">
-          <img class="h-8 w-auto" src="/static/logo.jpg" alt="로고">
+          <img class="h-8 w-auto" src="/static/backpack.png" alt="로고">
           <span class="titlelogo font-bold ml-2 text-3xl">내일은 정글</span>
                 </a>
         </div>
@@ -69,7 +71,7 @@
             </button>
 
           {% else %}
-            <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그인</button>
+            <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium" onclick="location.href='{{ url_for('main.login_page') }}'">로그인</button>
           {% endif %}
         </div>
       </div>
@@ -81,10 +83,16 @@
     
     <div class="space-y-6">
       <div class="flex flex-wrap gap-2">
-        <a href="{{ url_for('recommended_items.recommended_items_page') }}" class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium"># 전체</a>
-        {% for cat in categories %}
-          <a href="{{ url_for('recommended_items.recommended_items_page', category=cat) }}" class="!rounded-button bg-white border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"># {{ cat }}</a>
-        {% endfor %}
+  <a href="{{ url_for('recommended_items.recommended_items_page') }}"
+     class="!rounded-button {% if active_category == '전체' %}bg-custom text-white{% else %}bg-white border border-gray-300 text-gray-500 hover:bg-gray-50{% endif %} px-4 py-2 text-sm font-medium">
+    # 전체
+  </a>
+  {% for cat in categories %}
+    <a href="{{ url_for('recommended_items.recommended_items_page', category=cat) }}"
+       class="!rounded-button {% if active_category == cat %}bg-custom text-white{% else %}bg-white border border-gray-300 text-gray-500 hover:bg-gray-50{% endif %} px-4 py-2 text-sm font-medium">
+      # {{ cat }}
+    </a>
+  {% endfor %}
       </div>
 
       <div class="flex flex-wrap gap-4 items-center">
