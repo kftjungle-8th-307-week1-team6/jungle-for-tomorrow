@@ -49,8 +49,8 @@
                 </div>
                 
                 <div class="flex items-center">
-                    {% if user_name and user_division and user_generation %}
-                    <span class="text-sm font-bold ">{{ user_division  }} {{ user_generation  }}기 {{ user_name }}</span>
+                    {% if user_details %}
+                    <span class="text-sm font-bold ">{{ user_details.get('division') }} {{ user_details.get('generation')  }}기 {{ user_details.get('name')  }}</span>
                     <span class="text-sm font-medium mr-5"> 님, 환영합니다!</span>
                     
                     <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium" onclick="location.href='{{ url_for('user.logout') }}'">

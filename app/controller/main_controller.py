@@ -8,6 +8,7 @@ router = Blueprint("main", __name__)
 @router.route('/')
 def home():
     username = None
+    user_details = None
     user_role = None
     try:
         if request.cookies.get('access_token_cookie'):
@@ -15,12 +16,13 @@ def home():
             verify_jwt_in_request(locations=['cookies'])
             # 유효한 토큰이면 사용자 ID 가져오기
             username = get_jwt_identity()
-
+            if username:
+                user_details = db.users.find_one({"username": username})
             claims = get_jwt()
             user_role = claims.get('role', 'user')
     except:
         pass
-    return render_template('index.html', username=username, user_role=user_role)
+    return render_template('index.html', user_details=user_details, username=username, user_role=user_role)
 
 @router.route('/loginPage')
 def login_page():

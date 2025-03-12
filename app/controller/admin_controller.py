@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
 from app.core.extension import bcrypt
 from app.core.database import db
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from bson.objectid import ObjectId
 from app.core.auth import admin_required
 import uuid
@@ -37,7 +38,15 @@ def admin_sign_up():
 @router.route('/items', methods=['GET'])
 @admin_required()
 def item_list():
+    current_user = None
+    user_details = None
 
+    try:
+        verify_jwt_in_request(optional=True)
+        current_user = get_jwt_identity()
+        user_details = db.users.find_one({"username": current_user})
+    except Exception:
+        pass
     # 페이지 번호 가져오기 (기본값 1)
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -52,10 +61,12 @@ def item_list():
 
     item_types = list(db.item_types.find({}))
 
+    print(user_details)
     return render_template(
         "admin/items.html",
         items=items,
         item_types=item_types,
+        user_details=user_details,
         page=page,
         per_page=per_page,
         total_pages=total_pages
