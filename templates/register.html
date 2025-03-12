@@ -270,11 +270,13 @@
       } else if ($("#nicknameBox").css("color") == "rgb(255, 0, 0)") {
         alert("닉네임 중복체크를 진행해주세요!");
         e.preventDefault();
+      } else {
+        let isRightDepartment = confirm($("#division").val() + " " + $("#generation").val() + "기 " + $("#name").val() + " 님으로 가입하시겠습니까?");
+        if (!isRightDepartment) {
+          e.preventDefault();
+        }
       }
-      let isRightDepartment = confirm($("#division").val() + " " + $("#generation").val() + "기 " + $("#name").val() + " 님으로 가입하시겠습니까?");
-      if (!isRightDepartment) {
-        e.preventDefault();
-      }
+
     });
 
     $("#idCheck").on("click", function () {
