@@ -35,8 +35,9 @@ def admin_sign_up():
     return jsonify({"message": "회원가입이 완료되었습니다."}), 201
 
 @router.route('/items', methods=['GET'])
-# @admin_required()
+@admin_required()
 def item_list():
+
     # 페이지 번호 가져오기 (기본값 1)
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -45,7 +46,7 @@ def item_list():
     skip_count = (page - 1) * per_page
 
     # 아이템 가져오기
-    items = list(db.items.find().skip(skip_count).limit(per_page))
+    items = list(db.items.find({'is_required': True}).skip(skip_count).limit(per_page))
     total_items = db.items.count_documents({})
     total_pages = (total_items + per_page - 1) // per_page
 
@@ -61,10 +62,10 @@ def item_list():
     )
 
 @router.route('/items/add', methods=["POST"])
-# @admin_required()
+@admin_required()
 def add_item():
-    name = request.form.get('name')
-    type_id = request.form.get('type')
+    name = request.form.get('item_name')
+    type_id = request.form.get('category')
     quantity = request.form.get('quantity', 1, type=int)
 
     if not name or not type_id:
@@ -75,8 +76,8 @@ def add_item():
     type_name = type_doc['name'] if type_doc else "알 수 없음"
 
     db.items.insert_one({
-        "name": name,
-        "type": type_name,
+        "item_name": name,
+        "category": type_name,
         "quantity": quantity,
         "is_required" : True,
         "is_recommended" : False,
@@ -85,10 +86,10 @@ def add_item():
 
 
 @router.route('/items/<string:id>/edit', methods=['POST'])
-# @admin_required()
+@admin_required()
 def edit_item(id):
-    name = request.form.get('name')
-    type_id = request.form.get('type')
+    name = request.form.get('item_name')
+    type_id = request.form.get('category')
     quantity = request.form.get('quantity', 1, type=int)
 
     if not name or not type_id:
@@ -101,8 +102,8 @@ def edit_item(id):
     db.items.update_one(
         {"_id": ObjectId(id)},
         {"$set": {
-            "name": name,
-            "type": type_name,
+            "item_name": name,
+            "category": type_name,
             "quantity": quantity,
             "is_required": True,
             "is_recommended": False,
@@ -112,7 +113,7 @@ def edit_item(id):
     return redirect(url_for('admin.item_list'))
 
 @router.route('/items/<string:id>/delete')
-# @admin_required()
+@admin_required()
 def delete_item(id):
     try:
         result = db.items.delete_one({"_id": ObjectId(id)})
@@ -123,3 +124,89 @@ def delete_item(id):
     except Exception as e:
         flash(f"항목 삭제 중 오류가 발생했습니다.: {str(e)}", 'error')
     return redirect(url_for('admin.item_list'))
+
+
+@router.route('/item-types/add', methods=['POST'])
+@admin_required()
+def add_item_type():
+    """새 항목 종류 추가"""
+    name = request.form.get('name')
+    if name:
+        db.item_types.insert_one({"name": name})
+        flash("항목 종류가 추가되었습니다.", "success")
+    return redirect(url_for('admin.item_list'))
+
+
+@router.route('/item-types/<id>/edit', methods=['POST'])
+@admin_required()
+def edit_item_type(id):
+    """항목 종류 수정 및 관련 아이템 업데이트"""
+    name = request.form.get('name')
+    if name:
+        # 기존 항목 이름 가져오기
+        old_type = db.item_types.find_one({"_id": ObjectId(id)})
+
+        # 항목 이름 업데이트
+        db.item_types.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {"name": name}}
+        )
+
+        # 해당 항목을 사용하는 모든 아이템 업데이트
+        if old_type:
+            db.items.update_many(
+                {"type": old_type["name"]},
+                {"$set": {"category": name}}
+            )
+
+        flash("항목 종류가 수정되었습니다.", "success")
+    return redirect(url_for('admin.item_list'))
+
+
+@router.route('/item-types/<id>/delete', methods=['GET'])
+@admin_required()
+def delete_item_type(id):
+    """항목 종류 삭제 및 관련 아이템 '기타'로 변경"""
+    # 삭제하려는 항목 정보 가져오기
+    item_type = db.item_types.find_one({"_id": ObjectId(id)})
+
+    # '기타' 항목인 경우 삭제 방지
+    if item_type and item_type["name"] == "기타":
+        flash("'기타' 항목은 삭제할 수 없습니다.", "error")
+        return redirect(url_for('admin.item_list'))
+
+    # 기타 항목 ID 찾기
+    other_type = db.item_types.find_one({"name": "기타"})
+
+    if not other_type:
+        # 기타 항목이 없으면 생성
+        other_type_id = db.item_types.insert_one({"name": "기타"}).inserted_id
+    else:
+        other_type_id = other_type["_id"]
+
+    if item_type:
+        # 해당 항목을 사용하는 모든 아이템을 '기타'로 변경
+        db.items.update_many(
+            {"type": item_type["name"]},
+            {"$set": {"category": "기타"}}
+        )
+
+        # 항목 삭제
+        db.item_types.delete_one({"_id": ObjectId(id)})
+        flash("항목 종류가 삭제되었고, 관련 아이템은 '기타' 항목으로 변경되었습니다.", "success")
+
+    return redirect(url_for('admin.item_list'))
+
+
+@router.route('/items/<id>/data', methods=['GET'])
+@admin_required()
+def get_item_data(id):
+    """아이템 데이터 JSON으로 반환"""
+    item = db.items.find_one({"_id": ObjectId(id)})
+    if item:
+        # ObjectId는 JSON 직렬화가 불가능하므로 문자열로 변환
+        item['_id'] = str(item['_id'])
+        if 'type_id' in item and item['type_id']:
+            item['type_id'] = str(item['type_id'])
+        return jsonify(item)
+    return jsonify({"error": "Item not found"}), 404

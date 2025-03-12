@@ -6,17 +6,28 @@
 <div class="mx-auto max-w-[98%] px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">
     <div class="mb-6">
         <nav class="flex justify-center space-x-4" aria-label="주 메뉴">
-            <a href="{{ url_for('my_list.items', filter='all') }}" class="px-4 py-2 text-base font-medium {% if filter == 'all' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">전체</a>
-            <a href="{{ url_for('my_list.items', filter='required') }}" class="px-4 py-2 text-base font-medium {% if filter == 'required' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">필수 준비물</a>
-            <a href="{{ url_for('my_list.items', filter='recommended') }}" class="px-4 py-2 text-base font-medium {% if filter == 'recommended' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">추천 준비물</a>
-            <a href="{{ url_for('my_list.items', filter='normal') }}" class="px-4 py-2 text-base font-medium {% if filter == 'normal' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">일반 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='all') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'all' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">전체</a>
+            <a href="{{ url_for('my_list.items', filter='required') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'required' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">필수 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='recommended') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'recommended' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">추천 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='normal') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'normal' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">일반 준비물</a>
         </nav>
     </div>
     <div class="mb-6">
         <nav class="flex justify-center space-x-4" aria-label="서브 메뉴">
-            <a href="{{ url_for('my_list.items', filter=filter, type='electronics') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'electronics' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">전자기기</a>
-            <a href="{{ url_for('my_list.items', filter=filter, type='stationery') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'stationery' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">학습&문구</a>
-            <a href="{{ url_for('my_list.items', filter=filter, type='other') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'other' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">기타</a>
+            <a href="{{ url_for('my_list.items', filter=filter, type='all') }}"
+               class="px-4 py-2 text-base font-medium {% if item_type == 'all' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">
+                전체
+            </a>
+            {% for type in item_types %}
+            <a href="{{ url_for('my_list.items', filter=filter, type=type._id) }}"
+               class="px-4 py-2 text-base font-medium {% if item_type == type._id|string %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">
+                {{ type.name }}
+            </a>
+            {% endfor %}
         </nav>
     </div>
     <div class="mb-6 flex justify-end w-full max-w-7xl">
@@ -26,6 +37,7 @@
         </button>
     </div>
     <div class="bg-white shadow rounded-lg overflow-hidden w-full mx-auto p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">내 준비물 관리</h2>
         <table class="min-w-full divide-y divide-gray-200 bg-white text-xl">
             <thead class="bg-gray-50">
                 <tr>
@@ -51,9 +63,9 @@
                         {% else %}
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mr-2">일반</span>
                         {% endif %}
-                        {{ item.name }}
+                        {{ item.item_name }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ item.type }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ item.category }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">{{ item.quantity }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <!-- 수정 및 삭제 버튼 -->
@@ -111,11 +123,11 @@
                         <form id="item-form" method="POST" action="{{ url_for('my_list.add_item') }}">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">품목명</label>
-                                <input type="text" name="name" id="item-name" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required/>
+                                <input type="text" name="item_name" id="item-name" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required/>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">종류</label>
-                                <select name="type" id="item-type" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required>
+                                <select name="category" id="item-type" class="w-full rounded-button border-gray-300 shadow-sm focus:border-custom focus:ring-custom" required>
                                     {% for type in item_types %}
                                     <option value="{{ type._id }}">{{ type.name }}</option>
                                     {% endfor %}
@@ -222,18 +234,18 @@
     document.getElementById('modal-title').textContent = '내 준비물 수정';
 
     // 품목명에서 필수/추천/일반 라벨 제거
-    const name = nameCell.replace(/필수|추천|일반/g, '').trim();
-    const type = row.cells[2].textContent;
+    const item_name = nameCell.replace(/필수|추천|일반/g, '').trim();
+    const category = row.cells[2].textContent;
     const quantity = row.cells[3].textContent;
 
     // 폼 필드 채우기
-    document.getElementById('item-name').value = name;
+    document.getElementById('item-name').value = item_name;
     document.getElementById('item-quantity').value = quantity;
 
     // 종류 선택 드롭다운 설정
     const typeSelect = document.getElementById('item-type');
     for (let i = 0; i < typeSelect.options.length; i++) {
-        if (typeSelect.options[i].text === type) {
+        if (typeSelect.options[i].text === category) {
             typeSelect.selectedIndex = i;
             break;
         }

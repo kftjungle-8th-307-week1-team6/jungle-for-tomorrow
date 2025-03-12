@@ -10,13 +10,22 @@
     <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
     <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
     {% block extra_head %}{% endblock %}
+    <style>
+        .header .logoBox {
+            padding-left: 2rem;
+            font-size: 2rem;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 font-[Noto Sans KR]">
     <div class="max-w-8xl mx-auto px-4">
         <div class="bg-white rounded-lg shadow-sm mb-6">
             <div class="flex items-center justify-between p-4 border-b">
                 <div class="flex items-center">
-                    <img src="{{ url_for('static', filename='images/logo_placeholder.png') }}" alt="로고" class="h-8"/>
+                    <a href="{{ url_for('main.home') }}" class="flex items-center">
+                      <img class="h-8 w-auto" src="/static/logo.jpg" alt="로고"/>
+                      <span class="logoBox font-bold ml-2 text-3xl">내일은 정글</span>
+                    </a>
                 </div>
                 {% block header_content %}{% endblock %}
             </div>

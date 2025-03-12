@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
 from app.core.extension import bcrypt
 from app.core.database import db
-from flask_jwt_extended import (create_access_token, get_jwt_identity,)
+from flask_jwt_extended import (create_access_token, get_jwt_identity,get_jwt)
 from datetime import timedelta
 from app.core.auth import user_required
 from bson.objectid import ObjectId
@@ -11,8 +11,8 @@ import uuid
 router = Blueprint("my_list", __name__, url_prefix="/my-list")
 
 @router.route('/check-list', methods=['GET'])
-# @user_required()
-def items():
+@user_required()
+def items(user_id=None):
     # 현재 페이지와 페이지당 항목 수 가져오기
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -20,10 +20,6 @@ def items():
     # 필터링 조건 가져오기
     filter_type = request.args.get('filter', 'all')
     item_type = request.args.get('type', 'all')
-
-    user_id = "67cf70db766c89c15fd3f67c"  # 임시
-
-    # user_id = get_jwt_identity()
     user_oid = ObjectId(user_id)
 
     user = db.users.find_one({"_id": user_oid})
@@ -55,24 +51,27 @@ def items():
                 {"is_recommended": False}
             ]
         }
+    # 아이템 타입 가져오기
+    item_types = list(db.item_types.find())
 
-    # 종류별 필터링
-    if item_type == 'electronics':
-        query["type"] = '전자기기'
-    elif item_type == 'stationery':
-        query["type"] = '학습&문구'
-    elif item_type == 'other':
-        query["type"] = '기타'
+    # 종류별 필터링 - 동적으로 적용
+    if item_type != 'all':
+        # 선택된 타입 ID에 해당하는 타입 이름 찾기
+        for type_doc in item_types:
+            if str(type_doc['_id']) == item_type or type_doc['name'] == item_type:
+                query["category"] = type_doc['name']
+                break
 
     # MongoDB에서 데이터 가져오기 (페이지네이션 적용)
     total_items = db.items.count_documents(query)
-    items = list(db.items.find(query).skip((page - 1) * per_page).limit(per_page))
+    items = list(db.items.find(query).sort([
+        ("is_required", -1),  # 필수 아이템 우선 (내림차순)
+        ("is_recommended", -1),  # 추천 아이템 다음 (내림차순)
+        ("shipped_count", -1)  # 배송 횟수 높은 순 (내림차순)
+    ]).skip((page - 1) * per_page).limit(per_page))
 
     # 전체 페이지 수 계산
     total_pages = (total_items + per_page - 1) // per_page
-
-    # 아이템 타입 가져오기
-    item_types = list(db.item_types.find())
 
     return render_template(
         'my_item/my_item.html',
@@ -88,19 +87,18 @@ def items():
 
 
 @router.route('/items/add', methods=["POST"])
-# @user_required()
+@user_required()
 def add_item(user_id=None):
-    name = request.form.get('name')
-    type_id = request.form.get('type')
+    name = request.form.get('item_name')
+    type_id = request.form.get('category')
     quantity = int(request.form.get('quantity', 1))
-    user_id = "67cf70db766c89c15fd3f67c" # 임시
     # 종류 이름 가져오기
     type_doc = db.item_types.find_one({"_id": ObjectId(type_id)})
     type_name = type_doc['name'] if type_doc else "알 수 없음"
 
     result = db.items.insert_one({
-        "name": name,
-        "type": type_name,
+        "item_name": name,
+        "category": type_name,
         "quantity": quantity,
         "is_required": False,
         "is_recommended": False,
@@ -119,9 +117,10 @@ def add_item(user_id=None):
 
 # 준비물 수정 API
 @router.route('/items/<string:id>/edit', methods=['POST'])
+@user_required()
 def edit_item(id, user_id=None):
-    name = request.form.get('name')
-    type_id = request.form.get('type')
+    name = request.form.get('item_name')
+    type_id = request.form.get('category')
     quantity = int(request.form.get('quantity', 1))
     item = db.items.find_one({"_id": ObjectId(id)})
 
@@ -135,8 +134,8 @@ def edit_item(id, user_id=None):
     db.items.update_one(
         {"_id": ObjectId(id)},
         {"$set": {
-            "name": name,
-            "type": type_name,
+            "item_name": name,
+            "category": type_name,
             "quantity": quantity,
             "is_required": False,
             "is_recommended": False,
@@ -148,11 +147,9 @@ def edit_item(id, user_id=None):
 
 # 준비물 삭제 API
 @router.route('/items/<string:id>/delete', methods=['GET'])
-def delete_item(id):
+@user_required()
+def delete_item(id, user_id=None):
     try:
-        # user_id = get_jwt_identity()
-        user_id = "67cf70db766c89c15fd3f67c" # 임시
-
         item_oid = ObjectId(id)
         user_oid = ObjectId(user_id)
 
@@ -165,9 +162,18 @@ def delete_item(id):
             {"_id":user_oid},
             {"$pull": {"saved_items": item_oid}}
         )
+        # 추천 항목인 경우 shipped_count 감소
+        if item and item.get('is_recommended'):
+            # shipped_count가 있고 1보다 크면 1 감소
+            if 'shipped_count' in item and item['shipped_count'] > 0:
+                db.items.update_one(
+                    {"_id": item_oid},
+                    {"$inc": {"shipped_count": -1}}
+                )
         # 추천 항목이 아닌 경우에만 DB에서 완전히 삭제
-        if not item.get('is_recommended'):
+        elif item:
             db.items.delete_one({"_id": item_oid})
+
         return redirect(url_for('my_list.items'))
     except Exception as e:
         flash(f'삭제 중 오류가 발생했습니다: {str(e)}', 'error')
@@ -175,13 +181,12 @@ def delete_item(id):
 
 
 @router.route("/items/<string:id>/check", methods=['POST'])
-def check_item(id):
+@user_required()
+def check_item(id, user_id=None):
     try:
         data = request.json
         is_checked = data.get('checked', False)
 
-        # user_id = get_jwt_identity()
-        user_id = "67cf70db766c89c15fd3f67c"  # 임시
         user_oid = ObjectId(user_id)
 
         if is_checked:

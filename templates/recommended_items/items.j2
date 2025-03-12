@@ -9,19 +9,65 @@
   <link href="https://ai-public.creatie.ai/gen_page/tailwind-custom.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
   <script src="https://ai-public.creatie.ai/gen_page/tailwind-config.min.js" data-color="#000000" data-border-radius="small"></script>
+
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+
+  <!-- 이 부분은 절대 지우지 마세요. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+
+  <style>
+    *{
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", "Apple SD Gothic Neo", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    }
+      
+    @media screen and (max-width: 500px) {
+      nav div span.titlelogo {
+        display: none;
+      }
+    }
+
+    nav div span.titlelogo {
+        box-sizing: border-box;
+        font-family: "Black Han Sans", sans-serif !important;
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    input.focused{
+      width: 480px;
+      max-width: 100%; 
+      transition: width 0.3s;
+    }
+
+    input.not_focused{
+      width: 240px;
+      transition: width 0.3s;
+    }
+  </style>
+
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen min-w-[400px]">
   <nav class="bg-white shadow">
     <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex-shrink-0 flex items-center">
-          <img class="h-8 w-auto" src="https://ai-public.creatie.ai/gen_page/logo_placeholder.png" alt="로고">
+            <a href="{{ url_for('main.home') }}" class="flex items-center">
+          <img class="h-8 w-auto" src="/static/logo.jpg" alt="로고">
+          <span class="titlelogo font-bold ml-2 text-3xl">내일은 정글</span>
+                </a>
         </div>
         <div class="flex items-center">
           {% if  user_details %}
             <span class="text-sm font-bold ">{{ user_details.get('division') }} {{ user_details.get('generation')  }}기 {{ user_details.get('name')  }}</span>
             <span class="text-sm font-medium mr-5"> 님, 환영합니다!</span>
-            <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그아웃</button>
+            
+            <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium" onclick="location.href='{{ url_for('user.logout') }}'">
+              로그아웃
+            </button>
+
           {% else %}
             <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">로그인</button>
           {% endif %}
@@ -30,8 +76,8 @@
     </div>
   </nav>
 
-  <main class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-2xl font-bold text-gray-900 mb-8">추천 아이템</h1>
+  <main class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-48 py-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-8">추천 준비물</h1>
     
     <div class="space-y-6">
       <div class="flex flex-wrap gap-2">
@@ -41,21 +87,32 @@
         {% endfor %}
       </div>
 
-      <div class="flex gap-4 items-center">
-        <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium" id="createNewItem">
-          <i class="fas fa-plus mr-2"></i>새 아이템 추가
-        </button>
-        <div class="flex-1 flex gap-4">
-          <div class="w-48">
+      <div class="flex flex-wrap gap-4 items-center">
+        <!-- 버튼 -->
+        
+        {% if   user_details %}
+          <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium min-w-[160px]" id="createNewItem">
+            <i class="fas fa-plus mr-2"></i>새 준비물 추가
+          </button>
+        {% else %}
+          <button class="!rounded-button   px-4 py-2 text-sm font-medium min-w-[160px]" style="opacity:0">
+            <i class="fas fa-plus mr-2"></i>새 준비물 추가
+          </button>
+        {% endif %}
+
+        <!-- 검색 기능 & 드롭다운 -->
+        <div class="flex  gap-4 md:flex-nowrap " style="width: calc(100% - 176px);">
+          <div class="ml-auto w-48 min-w-36">
             <select class="w-full border-gray-300 focus:border-custom focus:ring-custom text-sm">
-              <option  value="none" disabled>=== 선택 ===</option>
+              <option value="none" disabled>=== 선택 ===</option>
               <option value="item_name" selected>준비물 이름</option>
-              <option value="description" >추천하는 이유</option>
+              <option value="description">추천하는 이유</option>
               <option value="author">작성자</option>
             </select>
           </div>
-          <div class="flex-1 relative">
-            <input id="search_field" type="text" placeholder="검색" class="w-full pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">
+          <div class="relative w-full md:w-auto">
+            <input id="search_field" type="text" placeholder="검색"
+              class="w-full md:w-[240px] transition-all duration-300 ease-in-out pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
           </div>
         </div>
@@ -80,7 +137,7 @@
           <p class="text-right ">
             <span class="text-sm text-gray-600 rec-item-author-division">― {{ item.author_division }}</span>
             <span class="text-sm text-gray-600 rec-item-author-generation">{{ item.author_generation }}기</span>
-            <span class="text-sm text-gray-600 rec-item-author-name">{{ item.author_name }}</span>
+            <span class="text-sm text-gray-600 font-bold rec-item-author-name">{{ item.author_name }}</span>
           </p>
           <div class="flex justify-between items-center pt-4">
             <button class="!rounded-button bg-custom text-white px-4 py-2 text-sm font-medium">
@@ -141,22 +198,6 @@
           {% endif %}
         </nav>
       </div>
-
-      {# <div class="flex justify-center mt-8">
-        <nav class="flex items-center space-x-2">
-          <button class="!rounded-button px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <button class="!rounded-button px-4 py-2 text-sm font-medium text-white bg-custom">1</button>
-          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">2</button>
-          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">3</button>
-          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">4</button>
-          <button class="!rounded-button px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">5</button>
-          <button class="!rounded-button px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </nav>
-      </div> #}
     </div>
   </main>
 
@@ -165,9 +206,9 @@
     <div class="bg-white p-6 rounded shadow-lg w-full max-w-lg">  
       <h2 class="text-xl font-bold mb-4">새 아이템 추가</h2>
       <form>
-        <input type="hidden" id="newAuthorName" value="{{ user_details.get('name')  }}">
-        <input type="hidden" id="newAuthorDivision" value="{{ user_details.get('division') }}">
-        <input type="hidden" id="newAuthorGeneration" value="{{ user_details.get('generation') }}">
+        <input type="hidden" id="newAuthorName" value="{{ user_details.get('name') if user_details  }}">
+        <input type="hidden" id="newAuthorDivision" value="{{ user_details.get('division') if user_details   }}">
+        <input type="hidden" id="newAuthorGeneration" value="{{ user_details.get('generation') if user_details   }}">
         <div class="mb-4">
           <label class="block text-gray-700 mb-2" for="newItemTitle">아이템명</label>
           <input type="text" id="newItemTitle" class="w-full border border-gray-300 p-2 rounded" placeholder="아이템명을 입력하세요">
@@ -248,7 +289,8 @@
   </div>
 
   <script>
-  
+    // TODO: static 경로의 .js 파일로 분리하여 관리하도록 - 근데 언제 하지
+
     function deleteItemFromDb(card) {
       if (confirm('이 아이템을 삭제하시겠습니까?')) {
         const itemId = card.id;
@@ -261,21 +303,24 @@
           card.remove();
         })
         .catch(error => {
-          console.error('Error:', error);
+          console.error('오류:', error);
           alert('삭제 중 오류가 발생했습니다.');
         });
       }
     }
 
+    // 참고: 새 아이템 추가 모달 열기임.
     function openCreateNewItemModal() {
       document.getElementById('createModal').classList.remove('hidden');
     }
 
+    // 참고: 새 아이템 추가 모달 열기임.
     function closeCreateNewItemModal() {
       document.getElementById('createModal').classList.add('hidden');
     }
 
-    function openModal(card) {
+    // 참고: 수정 모달 열기임.
+    function openModal(card) { 
       const modal = document.getElementById('editModal');
       const title = card.querySelector('h3').textContent;
       const quantity = card.querySelector('.rec-item-quantity').textContent.trim();
@@ -292,8 +337,9 @@
       document.getElementById('editItemCategory').value = category;
 
       modal.classList.remove('hidden');
-    }
+    } 
 
+    // 참고: 수정 모달 열기임.
     function closeModal() {
       const modal = document.getElementById('editModal');
       modal.classList.add('hidden');
@@ -399,7 +445,7 @@
         description: itemDescription
       };
 
-      // /item URL로 POST 요청 (서버에서 새로운 아이템 생성)
+      // POST /item로 요청 (서버에서 새로운 아이템 생성)
       fetch('/recommended-items/item', {
         method: 'POST',
         headers: {
@@ -416,7 +462,7 @@
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('생성 중 오류가 발생했습니다.');
+        alert('준비물 추가 도중 오류가 발생했습니다.');
       });
     });
 
@@ -425,14 +471,14 @@
       // 버튼의 텍스트가 '담기'를 포함하는지? or 정확히 일치하는지?
       if (button.textContent.trim().includes('담기')) {
         button.addEventListener('click', async () => {
-          if (!confirm('이 아이템을 당신의 목록에 추가하시겠습니까?')) {
+          if (!confirm('이 준비물을 나의 목록에도 담을까요?')) {
             return;
           }
           
           const container = button.closest('[id]');
           if (!container) {
             console.error('오류: 해당 버튼의 상위 요소에서 id를 찾을 수 없음.');
-            alert('아이템 추가 중 오류가 발생했습니다.');
+            alert('준비물을 담는 도중 오류가 발생했습니다.');
             return;
           }
           const itemId = container.id;
@@ -446,20 +492,33 @@
               throw new Error('네트워크 응답에 문제가 있습니다.');
             }
             
+            // 결과 수신 && 담기 옆 숫자 1을 더하기
             const result = await response.json();
-            // 담기 옆 숫자 1을 더하기
             const shippedCount = container.querySelector('.itemShippedCount');
             shippedCount.textContent = `${result.shipped_count}`;
-
-            alert('아이템이 추가되었습니다.');
+            alert('준비물이 성공적으로 담았습니다.');
           } catch (error) {
             console.error('Error:', error);
-            alert('아이템 추가 중 오류가 발생했습니다.');
+            alert('준비물을 담는 도중 오류가 발생했습니다.');
           }
         });
       }
     });
 
+    // 검색 상자 클릭 시 좌측으로 뻗어나감.
+    const searchField = document.getElementById('search_field');
+
+    searchField.addEventListener('focus', () => {
+      // not-focused 클래스 제거 및 focused 클래스 추가
+      searchField.classList.remove('not_focused');  
+      searchField.classList.add('focused');
+    });
+
+    searchField.addEventListener('blur', () => {
+      // focused 클래스 제거 및 not-focuced 클래스 추가
+      searchField.classList.remove('focused');
+      searchField.classList.add('not_focused');
+    });
     
     // 검색 기능 구현 (엔터 키 입력 시에만 반영)
     document.getElementById('search_field').addEventListener('keydown', (e) => {
