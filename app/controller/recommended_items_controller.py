@@ -42,7 +42,8 @@ def create_item():
         item['author_generation'] = int(item.get('author_generation', 5))
     except ValueError:
         return jsonify({'message': 'Invalid author_generation value, must be an integer'}), 400
-    
+    item['is_recommended'] = True
+    item['is_required'] = False
     item['essential'] = False
     db.items.insert_one(item)
     return jsonify({'message': 'success', 'id': str(item['_id'])})  # ID 반환
@@ -122,7 +123,10 @@ def recommended_items_page():
     limit_value = min(per_page, remaining_items)
 
     # 아이템 조회 (내림차순 정렬 + 페이지네이션)
+    # 수정된 코드
+    search_query["is_recommended"] = True  # search_query에 is_recommended 조건 추가
     items_cursor = items_collection.find(search_query).sort("shipped_count", -1).skip(skip).limit(limit_value)
+
     items = list(items_cursor)
 
     # ObjectId 변환
@@ -140,7 +144,13 @@ def recommended_items_page():
             start_page = max(1, end_page - 4)
     pages_range = range(start_page, end_page + 1)
 
-    categories = ["의료품", "문구/학용품", "서적", "전자기기", "생필품", "가방", "의류", "호신용품", "식품", "기타"]
+    # 하드코딩된 카테고리 대신 item_types 컬렉션에서 동적으로 가져오기
+    item_types = list(db.item_types.find())
+    categories = [item_type["name"] for item_type in item_types]
+
+    # 기타 카테고리가 없으면 추가
+    if "기타" not in categories:
+        categories.append("기타")
 
     return render_template(
         "recommended_items/items.j2",

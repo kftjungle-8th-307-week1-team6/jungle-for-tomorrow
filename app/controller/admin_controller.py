@@ -46,7 +46,7 @@ def item_list():
     skip_count = (page - 1) * per_page
 
     # 아이템 가져오기
-    items = list(db.items.find().skip(skip_count).limit(per_page))
+    items = list(db.items.find({'is_required': True}).skip(skip_count).limit(per_page))
     total_items = db.items.count_documents({})
     total_pages = (total_items + per_page - 1) // per_page
 
@@ -64,8 +64,8 @@ def item_list():
 @router.route('/items/add', methods=["POST"])
 @admin_required()
 def add_item():
-    name = request.form.get('name')
-    type_id = request.form.get('type')
+    name = request.form.get('item_name')
+    type_id = request.form.get('category')
     quantity = request.form.get('quantity', 1, type=int)
 
     if not name or not type_id:
@@ -76,8 +76,8 @@ def add_item():
     type_name = type_doc['name'] if type_doc else "알 수 없음"
 
     db.items.insert_one({
-        "name": name,
-        "type": type_name,
+        "item_name": name,
+        "category": type_name,
         "quantity": quantity,
         "is_required" : True,
         "is_recommended" : False,
@@ -88,8 +88,8 @@ def add_item():
 @router.route('/items/<string:id>/edit', methods=['POST'])
 @admin_required()
 def edit_item(id):
-    name = request.form.get('name')
-    type_id = request.form.get('type')
+    name = request.form.get('item_name')
+    type_id = request.form.get('category')
     quantity = request.form.get('quantity', 1, type=int)
 
     if not name or not type_id:
@@ -102,8 +102,8 @@ def edit_item(id):
     db.items.update_one(
         {"_id": ObjectId(id)},
         {"$set": {
-            "name": name,
-            "type": type_name,
+            "item_name": name,
+            "category": type_name,
             "quantity": quantity,
             "is_required": True,
             "is_recommended": False,
@@ -156,7 +156,7 @@ def edit_item_type(id):
         if old_type:
             db.items.update_many(
                 {"type": old_type["name"]},
-                {"$set": {"type": name}}
+                {"$set": {"category": name}}
             )
 
         flash("항목 종류가 수정되었습니다.", "success")
@@ -188,7 +188,7 @@ def delete_item_type(id):
         # 해당 항목을 사용하는 모든 아이템을 '기타'로 변경
         db.items.update_many(
             {"type": item_type["name"]},
-            {"$set": {"type": "기타", "type_id": other_type_id}}
+            {"$set": {"category": "기타"}}
         )
 
         # 항목 삭제
