@@ -23,6 +23,9 @@ def items(user_id=None):
     user_oid = ObjectId(user_id)
 
     user = db.users.find_one({"_id": user_oid})
+    user_name = user.get('name')
+    user_division = user.get('division')
+    user_generation = user.get('generation')
     checked_items = user.get('checked_items', [])
     saved_item_ids = user.get('saved_items', [])
 
@@ -78,6 +81,9 @@ def items(user_id=None):
 
     return render_template(
         'my_item/my_item.html',
+        user_name=user_name,
+        user_division=user_division,
+        user_generation=user_generation,
         items=items,
         item_types=item_types,
         filter=filter_type,
