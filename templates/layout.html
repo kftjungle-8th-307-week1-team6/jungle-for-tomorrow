@@ -16,7 +16,9 @@
         <div class="bg-white rounded-lg shadow-sm mb-6">
             <div class="flex items-center justify-between p-4 border-b">
                 <div class="flex items-center">
-                    <img src="{{ url_for('static', filename='images/logo_placeholder.png') }}" alt="로고" class="h-8"/>
+                    <a href="{{ url_for('main.home') }}" class="flex items-center">
+                        <img src="{{ url_for('static', filename='images/logo_placeholder.png') }}" alt="로고" class="h-8"/>
+                    </a>
                 </div>
                 {% block header_content %}{% endblock %}
             </div>

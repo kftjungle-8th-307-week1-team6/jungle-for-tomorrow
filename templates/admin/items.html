@@ -7,9 +7,14 @@
     <div class="p-6">
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-bold text-gray-900">필수 준비물 설정</h1>
-            <button class="px-4 py-2 bg-custom text-white font-medium rounded hover:bg-custom/90 transition-colors !rounded-button" onclick="document.getElementById('modal').classList.remove('hidden')">
-                등록
-            </button>
+            <div class="space-x-2">
+                <button class="px-4 py-2 bg-custom text-white font-medium rounded hover:bg-custom/90 transition-colors !rounded-button" onclick="document.getElementById('modal').classList.remove('hidden')">
+                    등록
+                </button>
+                <button class="px-4 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition-colors !rounded-button" onclick="openItemTypeModal()">
+                    항목 관리
+                </button>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -157,6 +162,102 @@
     </div>
 </div>
 
+<!-- 항목 관리 모달 -->
+<div id="itemTypeModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+        <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-xl font-bold text-gray-900">항목 종류 관리</h2>
+            <button class="text-gray-400 hover:text-gray-500" onclick="document.getElementById('itemTypeModal').classList.add('hidden')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="flex border-b">
+            <button id="createTypeTab" class="px-4 py-2 text-sm font-medium text-custom border-b-2 border-custom" onclick="switchTypeTab('createType')">
+                등록
+            </button>
+            <button id="editTypeTab" class="px-4 py-2 text-sm font-medium text-gray-500" onclick="switchTypeTab('editType')">
+                수정
+            </button>
+            <button id="deleteTypeTab" class="px-4 py-2 text-sm font-medium text-gray-500" onclick="switchTypeTab('deleteType')">
+                삭제
+            </button>
+        </div>
+
+        <!-- 등록 폼 -->
+        <div id="createTypeForm" class="block">
+            <form action="{{ url_for('admin.add_item_type') }}" method="POST">
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">항목 종류명</label>
+                            <input type="text" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom focus:border-custom" required/>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onclick="document.getElementById('itemTypeModal').classList.add('hidden')">취소</button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-custom rounded-md hover:bg-custom/90">등록</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 수정 폼 -->
+        <div id="editTypeForm" class="hidden">
+            <form action="{{ url_for('admin.edit_item_type', id=0) }}" method="POST" id="typeEditForm">
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">수정할 항목 선택</label>
+                            <select id="typeSelector" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom focus:border-custom" onchange="loadTypeData(this.value)">
+                                <option value="">선택하세요</option>
+                                {% for type in item_types %}
+                                <option value="{{ type._id }}">{{ type.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">항목 종류명</label>
+                            <input type="text" id="editTypeName" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom focus:border-custom" required/>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onclick="document.getElementById('itemTypeModal').classList.add('hidden')">취소</button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-custom rounded-md hover:bg-custom/90">수정</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 삭제 폼 -->
+        <div id="deleteTypeForm" class="hidden">
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">삭제할 항목 선택</label>
+                        <select id="deleteTypeSelector" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom focus:border-custom">
+                            <option value="">선택하세요</option>
+                            {% for type in item_types %}
+                            <option value="{{ type._id }}">{{ type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mt-2 p-4 bg-red-50 rounded-md">
+                        <p class="text-sm text-red-600">선택한 항목 종류를 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며, 해당 종류에 속한 모든 준비물도 함께 삭제됩니다.</p>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onclick="document.getElementById('itemTypeModal').classList.add('hidden')">취소</button>
+                    <button type="button" onclick="deleteSelectedType()" class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600">삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <script>
     function editItem(id) {
         // 여기서 AJAX로 아이템 정보를 가져오거나, 이미 페이지에 있는 데이터를 활용할 수 있습니다
@@ -179,6 +280,58 @@
     function confirmDelete(id) {
         document.getElementById('deleteLink').href = "{{ url_for('admin.delete_item', id=0) }}".replace('0', id);
         document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    // 항목 종류 관리 모달 열기
+    function openItemTypeModal() {
+        switchTypeTab('createType');
+        document.getElementById('itemTypeModal').classList.remove('hidden');
+    }
+
+    // 항목 종류 탭 전환
+    function switchTypeTab(tab) {
+        // 모든 탭 버튼 비활성화
+        document.getElementById('createTypeTab').className = "px-4 py-2 text-sm font-medium text-gray-500";
+        document.getElementById('editTypeTab').className = "px-4 py-2 text-sm font-medium text-gray-500";
+        document.getElementById('deleteTypeTab').className = "px-4 py-2 text-sm font-medium text-gray-500";
+
+        // 모든 폼 숨기기
+        document.getElementById('createTypeForm').className = "hidden";
+        document.getElementById('editTypeForm').className = "hidden";
+        document.getElementById('deleteTypeForm').className = "hidden";
+
+        // 선택된 탭 활성화
+        document.getElementById(tab + 'Tab').className = "px-4 py-2 text-sm font-medium text-custom border-b-2 border-custom";
+        document.getElementById(tab + 'Form').className = "block";
+    }
+
+    // 항목 종류 데이터 로드
+    function loadTypeData(typeId) {
+        if (!typeId) return;
+
+        // 선택된 항목 종류 찾기
+        const typeSelect = document.getElementById('typeSelector');
+        const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+        const typeName = selectedOption.text;
+
+        // 폼 필드에 데이터 채우기
+        document.getElementById('editTypeName').value = typeName;
+
+        // 폼 액션 URL 업데이트
+        document.getElementById('typeEditForm').action = "{{ url_for('admin.edit_item_type', id=0) }}".replace('0', typeId);
+    }
+
+    // 선택한 항목 종류 삭제
+    function deleteSelectedType() {
+        const typeId = document.getElementById('deleteTypeSelector').value;
+        if (!typeId) {
+            alert('삭제할 항목 종류를 선택해주세요.');
+            return;
+        }
+
+        if (confirm('정말로 이 항목 종류를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+            window.location.href = "{{ url_for('admin.delete_item_type', id=0) }}".replace('0', typeId);
+        }
     }
 </script>
 {% endblock %}

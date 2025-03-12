@@ -1,54 +1,61 @@
+import uuid
 from flask import Blueprint, jsonify, request, flash, redirect, url_for, render_template
 from app.core.extension import bcrypt
 from app.core.database import db
-from flask_jwt_extended import (create_access_token, get_jwt_identity)
-from datetime import timedelta
+from flask_jwt_extended import (create_access_token, get_jwt_identity, create_refresh_token, get_jwt)
+from datetime import timedelta, datetime
 from app.core.auth import user_required
-import uuid
-from pymongo import MongoClient
-# client = MongoClient('localhost', 27017)
-# db = client.dbyurucamp1
 
 router = Blueprint("user", __name__, url_prefix="/user")
 
 
 @router.route('/login', methods=['POST'])
 def login():
-    username = request.form.get('username', None)
-    password = request.form.get('password', None)
+    try:
+        username = request.form.get('username', None)
+        password = request.form.get('password', None)
+        if not username or not password:
+            return jsonify({"msg": "사용자명과 비밀번호를 모두 입력해주세요"}), 400
 
-    if not username or not password:
-        return jsonify({"msg": "사용자명과 비밀번호를 모두 입력해주세요"}), 400
+        user = db.users.find_one({"username": username})
 
-    user = db.users.find_one({"username": username})
+        if not user or not bcrypt.check_password_hash(user["password"], password):
+            flash("잘못된 사용자명 또는 비밀번호 입니다.", "error")
+            return redirect(url_for('main.login_page'))
 
-    if not user or not bcrypt.check_password_hash(user["password"], password):
-        flash("잘못된 사용자명 또는 비밀번호 입니다.", "error")
+        user_role = user.get("role", "user")
+
+        if user_role not in ["admin", "user"]:
+            user_role = "user"
+        # 사용자 ID를 문자열로 변환하여 토큰에 포함
+        user_id = str(user["_id"])
+
+        additional_claims = {
+            "role": user_role,
+            "user_id": user_id  # 사용자 ID 추가
+        }
+        access_token = create_access_token(
+            identity=username,
+            additional_claims=additional_claims,
+            expires_delta=timedelta(hours=1)
+        )
+
+        response = redirect(url_for('main.home'))
+
+        response.set_cookie(
+            'access_token_cookie',
+            access_token,
+            httponly=True,
+            max_age=3600,
+            secure=False,
+            samesite='Lax'
+        )
+        return response
+
+    except Exception as e:
+        print(f"로그인 오류: {str(e)}")
         return redirect(url_for('main.login_page'))
 
-    user_role = user.get("role", "user")
-
-    if user_role not in ["admin", "user"]:
-        user_role = "user"
-
-    additional_claims = {"role": user_role}
-    access_token = create_access_token(
-        identity=username,
-        additional_claims=additional_claims,
-        expires_delta=timedelta(hours=1)
-    )
-
-    response = redirect(url_for('main.home'))
-
-    response.set_cookie(
-        'access_token_cookie',
-        access_token,
-        httponly=True,
-        max_age=3600,
-        secure=False,
-        samesite='Lax'
-    )
-    return response
 
 @router.route('/signup', methods=['POST'])
 def sign_up():
