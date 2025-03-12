@@ -86,8 +86,9 @@
         <img src="{{ url_for('static', filename='logo.jpg')}}" alt="" width="60" height="57"> 내일은 정글
     </div>
     <div class="buttonBox" style="padding-right: 3rem;">
-        {% if request.cookies.get('access_token_cookie') %}
-            <span class="mr-3">{{ username }}님 환영합니다</span>
+        {% if user_details %}
+            <span class="text-sm font-bold ">{{ user_details.get('division') }} {{ user_details.get('generation')  }}기 {{ user_details.get('name')  }}</span>
+            <span class="text-sm font-medium mr-5"> 님, 환영합니다!</span>
             <a href="{{ url_for('user.logout') }}"><button type="button" class="btn btn-outline-dark">로그아웃</button></a>
         {% else %}
             <a href="{{ url_for('main.login_page') }}"><button type="button" class="btn btn-outline-dark">로그인</button></a>
