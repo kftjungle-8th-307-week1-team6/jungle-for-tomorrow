@@ -49,7 +49,7 @@
             </select>
           </div>
           <div class="flex-1 relative">
-            <input type="text" placeholder="검색" class="w-full pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">
+            <input id="search_field" type="text" placeholder="검색" class="w-full pl-10 pr-4 py-2 border-gray-300 focus:border-custom focus:ring-custom text-sm">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
           </div>
         </div>
@@ -366,6 +366,27 @@
         });
       }
     });
+    
+    // 검색 기능 구현 (엔터 키 입력 시에만 반영)
+    document.getElementById('search_field').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();  // 기본 엔터 동작 방지
+        const searchValue = e.target.value.trim();
+        const searchField = document.querySelector('select').value;
+
+        const params = new URLSearchParams(window.location.search);
+        if (searchValue) {
+          params.set('search', searchValue);
+          params.set('search_field', searchField);
+        } else {
+          params.delete('search');
+          params.delete('search_field');
+        }
+
+        window.location.search = params.toString();
+      }
+    });
+
   </script>
 </body>
 </html>

@@ -80,15 +80,24 @@ def edit_item(object_id):
 @router.route('/list', methods=['GET'])
 def recommended_items_page():
     parameter_dict = request.args.to_dict()    
-    items_collection = db.items    
+    items_collection = db.items
     
+    search_query = {} # 검색 조건을 위해 빈 딕셔너리 생성 (없으면 걍 전체 조회)
+
+    # 카테고리 필터링 기능
     category = parameter_dict.get('category')
     if category:
         items_cursor = items_collection.find({'category': category})
-    else:
+    else: # 카테고리가 없으면 전체 조회
         items_cursor = items_collection.find()
-
-    items = list(items_cursor)
+        
+    # 검색 기능
+    search_keyword = parameter_dict.get('search', '').strip()  # 검색 키워드
+    search_field = parameter_dict.get('search_field', '')  # 검색 필드 (item_name, description, author 중 1개)
+    if search_keyword and search_field in ['item_name', 'description', 'author']:
+        search_query[search_field] = {"$regex": search_keyword, "$options": "i"}  # 대소문자 구분 없이 검색
+    items_cursor = items_collection.find(search_query) # 검색 조건이 없으면 전체 조회
+    items = list(items_cursor)  # 커서를 리스트로 변환
     
     for item in items:
         item['_id'] = str(item['_id'])  # ObjectId → String 변환
