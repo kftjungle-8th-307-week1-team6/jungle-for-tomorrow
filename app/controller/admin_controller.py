@@ -210,3 +210,29 @@ def get_item_data(id):
             item['type_id'] = str(item['type_id'])
         return jsonify(item)
     return jsonify({"error": "Item not found"}), 404
+
+
+@router.route('/items/batch-delete', methods=['POST'])
+@admin_required()  # 관리자만 접근 가능
+def batch_delete_items():
+    item_ids = request.json.get('item_ids', [])
+
+    if not item_ids:
+        return jsonify({"result": "failure", "reason": "No items selected"}), 400
+
+    try:
+        # ObjectId로 변환
+        object_ids = [ObjectId(id) for id in item_ids]
+
+        # 아이템 논리적 삭제 (is_deleted = True로 설정)
+        result = db.items.update_many(
+            {"_id": {"$in": object_ids}},
+            {"$set": {"is_deleted": True}}
+        )
+
+        return jsonify({
+            "result": "success",
+            "deleted_count": result.deleted_count
+        })
+    except Exception as e:
+        return jsonify({"result": "failure", "reason": str(e)}), 500
