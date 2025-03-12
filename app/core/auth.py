@@ -10,16 +10,20 @@ def role_required(allowed_roles):
         def decorator(*args, **kwargs):
             try:
                 verify_jwt_in_request(locations=['cookies'])
-                current_user_id = get_jwt_identity()
-            except Exception as e:
-                return redirect(url_for('user.login'))
-            claims = get_jwt()
-            role = claims.get("role", "")
+                claims = get_jwt()
+                role = claims.get("role", "")
+                user_id = claims.get("user_id")
+                if role not in allowed_roles:
+                    return jsonify({"error":"접근 권한이 없습니다."}), 403
+                import inspect
+                sig = inspect.signature(fn)
+                if 'user_id' in sig.parameters:
+                    kwargs['user_id'] = user_id
 
-            if role not in allowed_roles:
-                return jsonify({"error":"접근 권한이 없습니다."}), 403
-            kwargs['user_id'] = current_user_id
-            return fn(*args, **kwargs)
+                return fn(*args, **kwargs)
+            except Exception as e:
+                print(f"this {e}")
+                return redirect(url_for('main.login_page'))
         return decorator
     return wrapper
 

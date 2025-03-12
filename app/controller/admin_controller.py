@@ -35,8 +35,9 @@ def admin_sign_up():
     return jsonify({"message": "회원가입이 완료되었습니다."}), 201
 
 @router.route('/items', methods=['GET'])
-# @admin_required()
+@admin_required()
 def item_list():
+
     # 페이지 번호 가져오기 (기본값 1)
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -61,7 +62,7 @@ def item_list():
     )
 
 @router.route('/items/add', methods=["POST"])
-# @admin_required()
+@admin_required()
 def add_item():
     name = request.form.get('name')
     type_id = request.form.get('type')
@@ -85,7 +86,7 @@ def add_item():
 
 
 @router.route('/items/<string:id>/edit', methods=['POST'])
-# @admin_required()
+@admin_required()
 def edit_item(id):
     name = request.form.get('name')
     type_id = request.form.get('type')
@@ -112,7 +113,7 @@ def edit_item(id):
     return redirect(url_for('admin.item_list'))
 
 @router.route('/items/<string:id>/delete')
-# @admin_required()
+@admin_required()
 def delete_item(id):
     try:
         result = db.items.delete_one({"_id": ObjectId(id)})

@@ -20,18 +20,16 @@
     }
 
     .container {
-      max-width: 1000px;
-      width: 90%;
+      width: 1000px;
       margin: auto;
       padding: 30px;
-      border: 2px dotted green;
+      border: 2px dotted gray;
       border-radius: 20px;
-      margin-top: 1vh;
+      margin-top: 3vh;
     }
 
     .row {
-      height: auto;
-      min-height: 50px;
+      height: 50px;
     }
 
     input {
@@ -151,8 +149,8 @@
     <img src="{{ url_for('static', filename='logo.jpg')}}" alt="" width="60" height="57"> 내일은 정글
   </div>
   <div class="container">
-    <form action="/user/signup" id="joinForm" method="post">
-      <div class="row mb-4 ms-1" id="registerBox">
+    <form action="{{ url_for('user.sign_up') }}" id="joinForm" method="POST">
+      <div class="row mb-5 ms-1" id="registerBox">
         <div class="col-12 col-lg-6">
           <a href="#" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="
                 어떤 항목도 적색이 아니어야 가입할 수 있습니다.
