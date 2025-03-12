@@ -6,17 +6,28 @@
 <div class="mx-auto max-w-[98%] px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">
     <div class="mb-6">
         <nav class="flex justify-center space-x-4" aria-label="주 메뉴">
-            <a href="{{ url_for('my_list.items', filter='all') }}" class="px-4 py-2 text-base font-medium {% if filter == 'all' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">전체</a>
-            <a href="{{ url_for('my_list.items', filter='required') }}" class="px-4 py-2 text-base font-medium {% if filter == 'required' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">필수 준비물</a>
-            <a href="{{ url_for('my_list.items', filter='recommended') }}" class="px-4 py-2 text-base font-medium {% if filter == 'recommended' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">추천 준비물</a>
-            <a href="{{ url_for('my_list.items', filter='normal') }}" class="px-4 py-2 text-base font-medium {% if filter == 'normal' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">일반 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='all') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'all' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">전체</a>
+            <a href="{{ url_for('my_list.items', filter='required') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'required' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">필수 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='recommended') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'recommended' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">추천 준비물</a>
+            <a href="{{ url_for('my_list.items', filter='normal') }}"
+               class="px-4 py-2 text-base font-medium {% if filter == 'normal' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">일반 준비물</a>
         </nav>
     </div>
     <div class="mb-6">
         <nav class="flex justify-center space-x-4" aria-label="서브 메뉴">
-            <a href="{{ url_for('my_list.items', filter=filter, type='electronics') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'electronics' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">전자기기</a>
-            <a href="{{ url_for('my_list.items', filter=filter, type='stationery') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'stationery' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">학습&문구</a>
-            <a href="{{ url_for('my_list.items', filter=filter, type='other') }}" class="px-4 py-2 text-base font-medium {% if item_type == 'other' %}text-custom{% else %}text-gray-500{% endif %} bg-white rounded-button hover:bg-gray-50">기타</a>
+            <a href="{{ url_for('my_list.items', filter=filter, type='all') }}"
+               class="px-4 py-2 text-base font-medium {% if item_type == 'all' %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">
+                전체
+            </a>
+            {% for type in item_types %}
+            <a href="{{ url_for('my_list.items', filter=filter, type=type._id) }}"
+               class="px-4 py-2 text-base font-medium {% if item_type == type._id|string %}bg-custom text-white hover:bg-custom/80{% else %}text-gray-500 bg-white hover:bg-gray-200{% endif %} rounded-button transition-colors duration-200">
+                {{ type.name }}
+            </a>
+            {% endfor %}
         </nav>
     </div>
     <div class="mb-6 flex justify-end w-full max-w-7xl">
