@@ -195,7 +195,7 @@ def recommended_items_page():
 @router.route('/item/<string:item_id>/save', methods=['POST'])
 def save_item(item_id):    
     current_user = None
-    user_id_string = ""
+    user_id_string = None
 
     # JWT => User의 ObjectId를 가져옴
     try:
@@ -204,7 +204,7 @@ def save_item(item_id):
         user_details = db.users.find_one({"username": current_user})
         user_id_string = str(user_details['_id'])
     except Exception:
-        pass
+        return jsonify({"result": "failure", "reason": "올바른 유저가 아닙니다."}), 403
 
     # User의 ObjectId를 담은 string을 ObjectId로 변환
     #   => User의 saved_items 필드에 아이템을 추가
@@ -213,18 +213,22 @@ def save_item(item_id):
 
         item_oid = ObjectId(item_id)
         user_oid = ObjectId(user_id)
-
+        
         item = db.items.find_one({"_id": item_oid})
         if not item:
-            return jsonify({"result": "failure"})
-        db.users.update_one(
+            return jsonify({"result": "failure", "reason": "올바른 아이템이 아닙니다."}), 400
+
+        result = db.users.update_one(
             {"_id": user_oid},
             {"$addToSet": {"saved_items": item_oid}}
         )
 
+        if result.modified_count == 0:
+            return jsonify({"result": "failure", "reason": "이미 담은 아이템입니다."}), 400
+
         # 해당 id의 아이템의 'shipped_count'를 1 증가시킴
         db.items.update_one({"_id": item_oid}, {"$inc": {"shipped_count": 1}}) 
-        return jsonify({"result": "success", "item_id": item_id, "shipped_count": item['shipped_count']+1 })
+        return jsonify({"result": "success", "item_id": item_id, "shipped_count": item['shipped_count']+1 }), 200
     
     except Exception as e:
-        return jsonify({"result": "failure"})
+        return jsonify({"result": "failure", "reason": "일반 오류."}), 500

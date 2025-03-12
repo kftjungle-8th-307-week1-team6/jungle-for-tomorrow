@@ -506,7 +506,11 @@
             });
             
             if (!response.ok) {
-              throw new Error('네트워크 응답에 문제가 있습니다.');
+              // JSON 응답으로부터 에러 메시지를 받아서 출력
+              // {"result": "failure", "reason": "Item already saved"} 형태로 받음
+              const result = await response.json();
+              alert(`오류: ${result.reason}`);
+              return;
             }
             
             // 결과 수신 && 담기 옆 숫자 1을 더하기
