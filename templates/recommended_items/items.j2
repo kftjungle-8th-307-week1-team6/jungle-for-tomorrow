@@ -116,7 +116,6 @@
         </div>
       </div>
 
-
       <!-- MongoDB에서 가져온 아이템들을 순회하며 카드로 표시 -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for item in items %}
@@ -288,7 +287,8 @@
   </div>
 
   <script>
-  
+    // TODO: static 경로의 .js 파일로 분리하여 관리하도록 - 근데 언제 하지
+
     function deleteItemFromDb(card) {
       if (confirm('이 아이템을 삭제하시겠습니까?')) {
         const itemId = card.id;
@@ -307,15 +307,18 @@
       }
     }
 
+    // 참고: 새 아이템 추가 모달 열기임.
     function openCreateNewItemModal() {
       document.getElementById('createModal').classList.remove('hidden');
     }
 
+    // 참고: 새 아이템 추가 모달 열기임.
     function closeCreateNewItemModal() {
       document.getElementById('createModal').classList.add('hidden');
     }
 
-    function openModal(card) {
+    // 참고: 수정 모달 열기임.
+    function openModal(card) { 
       const modal = document.getElementById('editModal');
       const title = card.querySelector('h3').textContent;
       const quantity = card.querySelector('.rec-item-quantity').textContent.trim();
@@ -332,8 +335,9 @@
       document.getElementById('editItemCategory').value = category;
 
       modal.classList.remove('hidden');
-    }
+    } 
 
+    // 참고: 수정 모달 열기임.
     function closeModal() {
       const modal = document.getElementById('editModal');
       modal.classList.add('hidden');
@@ -456,7 +460,7 @@
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('생성 중 오류가 발생했습니다.');
+        alert('준비물 추가 도중 오류가 발생했습니다.');
       });
     });
 
