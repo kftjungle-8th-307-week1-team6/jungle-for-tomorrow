@@ -134,7 +134,7 @@ def recommended_items_page():
 
     # 페이지네이션 처리
     page = int(parameter_dict.get('page', 1))
-    per_page = int(parameter_dict.get('per_page', 10))
+    per_page = int(parameter_dict.get('per_page', 9))
     skip = (page - 1) * per_page
 
     # 전체 문서 수 및 총 페이지 수 계산
