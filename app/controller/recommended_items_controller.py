@@ -20,12 +20,12 @@ def get_item():
     try:
         object_id = ObjectId(object_id)
     except (InvalidId, TypeError):
-        return jsonify({"result": "failure", "reason": "Invalid ObjectId format"}), 400
+        return jsonify({"result": "failure", "reason": "잘못된 ObjectId 포맷."}), 400
 
     item = db.items.find_one({'_id': object_id})
     
     if not item:
-        return jsonify({"result": "failure", "reason": "Item not found"}), 404
+        return jsonify({"result": "failure", "reason": "아이템을 찾을 수 없습니다."}), 404
 
     item['_id'] = str(item['_id'])  # JSON 변환을 위해 문자열로 변환
     return jsonify(item)
@@ -41,7 +41,7 @@ def create_item():
     try:
         item['author_generation'] = int(item.get('author_generation', 5))
     except ValueError:
-        return jsonify({'message': 'Invalid author_generation value, must be an integer'}), 400
+        return jsonify({'message': '잘못된 author_generation 값. 정수여야 함.'}), 400
     item['is_recommended'] = True
     item['is_required'] = False
     item['essential'] = False
