@@ -236,17 +236,17 @@
         <input type="hidden" id="newAuthorGeneration" value="{{ user_details.get('generation') if user_details   }}">
         <div class="mb-4">
           <label class="block text-gray-700 mb-2" for="newItemTitle">아이템명</label>
-          <input type="text" id="newItemTitle" class="w-full border border-gray-300 p-2 rounded" placeholder="아이템명을 입력하세요">
+          <input type="text" id="newItemTitle" class="w-full border border-gray-300 p-2 rounded" placeholder="아이템명을 입력하세요" maxlength="10">
         </div>
 
         <div class="mb-4 flex">
           <div class="mb-4 mr-4 w-full">
             <label class="block text-gray-700 mb-2" for="newItemQuantity">수량</label>
-            <input type="text" id="newItemQuantity" class="w-full border border-gray-300 p-2 rounded" placeholder="수량을 입력하세요">
+            <input type="text" id="newItemQuantity" class="w-full border border-gray-300 p-2 rounded" placeholder="수량을 입력하세요" maxlength="10">
           </div>
           <div class="mb-4">
             <label class="block text-gray-700 mb-2" for="newItemUnit">단위</label>
-            <input type="text" id="newItemUnit" class="w-full border border-gray-300 p-2 rounded" placeholder="예시: 개, kg, ml">
+            <input type="text" id="newItemUnit" class="w-full border border-gray-300 p-2 rounded" placeholder="예시: 개, kg, ml" maxlength="5">
           </div>
         </div>
         <div class="mb-4">
@@ -260,7 +260,7 @@
 
         <div class="mb-4">
           <label class="block text-gray-700 mb-2" for="newItemDescription">설명</label>
-          <textarea id="newItemDescription" class="w-full border border-gray-300 p-2 rounded" rows="3" placeholder="설명을 입력하세요"></textarea>
+          <textarea id="newItemDescription" class="w-full border border-gray-300 p-2 rounded" rows="3" placeholder="설명을 입력하세요" maxlength="50"></textarea>
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" id="cancelCreate" class="!rounded-button bg-gray-300 text-white px-4 py-2 text-sm font-medium">취소</button>
@@ -269,6 +269,7 @@
       </form>
     </div>
   </div>  
+
 
   <!-- 수정 모달 (초기에는 hidden) -->
   <div id="editModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center">
@@ -279,17 +280,17 @@
         <input type="hidden" id="editItemId" value="">
         <div class="mb-4">
           <label class="block text-gray-700 mb-2" for="editItemTitle">아이템명</label>
-          <input type="text" id="editItemTitle" class="w-full border border-gray-300 p-2 rounded" placeholder="아이템명을 입력하세요">
+          <input type="text" id="editItemTitle" class="w-full border border-gray-300 p-2 rounded" placeholder="아이템명을 입력하세요" maxlength="10">
         </div>
 
         <div class="mb-4 flex">
           <div class="mb-4 mr-4 w-full">
             <label class="block text-gray-700 mb-2" for="editItemQuantity">수량</label>
-            <input type="text" id="editItemQuantity" class="w-full border border-gray-300 p-2 rounded" placeholder="수량을 입력하세요">
+            <input type="text" id="editItemQuantity" class="w-full border border-gray-300 p-2 rounded" placeholder="수량을 입력하세요" maxlength="10">
           </div>
           <div class="mb-4">
             <label class="block text-gray-700 mb-2" for="editItemUnit">단위</label>
-            <input type="text" id="editItemUnit" class="w-full border border-gray-300 p-2 rounded" placeholder="예시: 개, kg, ml">
+            <input type="text" id="editItemUnit" class="w-full border border-gray-300 p-2 rounded" placeholder="예시: 개, kg, ml" maxlength="5">
           </div>
         </div>
         <div class="mb-4">
@@ -303,7 +304,7 @@
 
         <div class="mb-4">
           <label class="block text-gray-700 mb-2" for="editItemDescription">설명</label>
-          <textarea id="editItemDescription" class="w-full border border-gray-300 p-2 rounded" rows="3" placeholder="설명을 입력하세요"></textarea>
+          <textarea id="editItemDescription" class="w-full border border-gray-300 p-2 rounded" rows="3" placeholder="설명을 입력하세요" maxlength="50"></textarea>
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" id="cancelEdit" class="!rounded-button bg-gray-300 text-white px-4 py-2 text-sm font-medium">취소</button>

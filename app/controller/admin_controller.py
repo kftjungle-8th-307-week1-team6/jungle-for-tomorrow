@@ -56,7 +56,7 @@ def item_list():
 
     # 아이템 가져오기
     items = list(db.items.find({'is_required': True}).skip(skip_count).limit(per_page))
-    total_items = db.items.count_documents({})
+    total_items = db.items.count_documents({'is_required': True})
     total_pages = (total_items + per_page - 1) // per_page
 
     item_types = list(db.item_types.find({}))

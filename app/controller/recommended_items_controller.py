@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for
 from app.core.extension import bcrypt
 from app.core.database import db
 from bson import ObjectId
@@ -20,12 +20,12 @@ def get_item():
     try:
         object_id = ObjectId(object_id)
     except (InvalidId, TypeError):
-        return jsonify({"result": "failure", "reason": "Invalid ObjectId format"}), 400
+        return jsonify({"result": "failure", "reason": "잘못된 ObjectId 포맷."}), 400
 
     item = db.items.find_one({'_id': object_id})
     
     if not item:
-        return jsonify({"result": "failure", "reason": "Item not found"}), 404
+        return jsonify({"result": "failure", "reason": "아이템을 찾을 수 없습니다."}), 404
 
     item['_id'] = str(item['_id'])  # JSON 변환을 위해 문자열로 변환
     return jsonify(item)
@@ -41,7 +41,7 @@ def create_item():
     try:
         item['author_generation'] = int(item.get('author_generation', 5))
     except ValueError:
-        return jsonify({'message': 'Invalid author_generation value, must be an integer'}), 400
+        return jsonify({'message': '잘못된 author_generation 값. 정수여야 함.'}), 400
     item['is_recommended'] = True
     item['is_required'] = False
     item['essential'] = False
@@ -111,7 +111,11 @@ def recommended_items_page():
         if user_details and user_details.get('role') == "admin":
             is_admin = True
     except Exception:
-        pass
+        # JWT 검증 실패 시, 로그인 페이지로 302 리다이렉트 (위치는 main.login_page )
+        return redirect(url_for('main.login_page'))
+    
+    if not user_details or not current_user:
+        return redirect(url_for('main.login_page'))
 
     # 필터 처리
     category = parameter_dict.get('category')
@@ -125,9 +129,12 @@ def recommended_items_page():
 
     # 삭제된 아이템 제외
     search_query["is_deleted"] = {"$ne": True}
+    # is_recommended 필드가 True인 아이템만 조회
+    search_query["is_recommended"] = True  # search_query에 is_recommended 조건 추가
+
     # 페이지네이션 처리
     page = int(parameter_dict.get('page', 1))
-    per_page = int(parameter_dict.get('per_page', 10))
+    per_page = int(parameter_dict.get('per_page', 9))
     skip = (page - 1) * per_page
 
     # 전체 문서 수 및 총 페이지 수 계산
@@ -138,10 +145,10 @@ def recommended_items_page():
     remaining_items = max(0, total_items - skip)
     limit_value = min(per_page, remaining_items)
 
-    # 아이템 조회 (내림차순 정렬 + 페이지네이션)
-    # 수정된 코드
-    search_query["is_recommended"] = True  # search_query에 is_recommended 조건 추가
-    items_cursor = items_collection.find(search_query).sort("shipped_count", -1).skip(skip).limit(limit_value)
+    # 아이템 조회 (내림차순 정렬 + 페이지네이션) 수정 r2
+    items_cursor = items_collection.find(search_query) \
+        .sort([("shipped_count", -1), ("_id", 1)]) \
+        .skip(skip).limit(per_page)
 
     items = list(items_cursor)
 
