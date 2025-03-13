@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for
 from app.core.extension import bcrypt
 from app.core.database import db
 from bson import ObjectId
@@ -111,7 +111,11 @@ def recommended_items_page():
         if user_details and user_details.get('role') == "admin":
             is_admin = True
     except Exception:
-        pass
+        # JWT 검증 실패 시, 로그인 페이지로 302 리다이렉트 (위치는 main.login_page )
+        return redirect(url_for('main.login_page'))
+    
+    if not user_details or not current_user:
+        return redirect(url_for('main.login_page'))
 
     # 필터 처리
     category = parameter_dict.get('category')
